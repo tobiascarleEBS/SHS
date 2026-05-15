@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portfolio Management Maturity — Improvement Recommendations</title>
+<link href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #ffffff; color: #000000; font-family: 'Calibri','Segoe UI',sans-serif; }
+  button { font-family: inherit; }
+  @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+  .modal-overlay { animation: fadeIn 0.18s; }
+  .rec-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 8px; cursor: pointer; transition: background 0.15s ease; }
+  .rec-bubble { transition: r 0.15s ease; }
+  .rec-num { width: 22px; height: 22px; border-radius: 50%; color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+  .modal-box { background: #fff; width: 100%; max-width: 760px; max-height: 90vh; overflow: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  @media (max-width: 900px) {
+    .layout-grid { grid-template-columns: 1fr !important; }
+    .sidebar { max-height: none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* =========================================================================
+   PORTFOLIO MGMT MATURITY — RECOMMENDATIONS — vanilla JS port
+   ========================================================================= */
+
+const SH = {
+  black: "#000000", orange: "#EC6602", petrol: "#009999",
+  grey900: "#404040", grey600: "#808080", grey300: "#BFBFBF",
+  grey100: "#E5E5E5", grey50: "#F5F5F5", white: "#FFFFFF",
+};
+
+const SECTION_COLORS = {
+  S1: "#EC6602", S2: "#009999", S3: "#7A5BD6",
+  S4: "#2BB673", S5: "#3B7CD9", S6: "#D6457D",
+};
+
+const SECTIONS = [
+  { key: "S1", label: "Leadership & Organization" },
+  { key: "S2", label: "Strategic Inputs" },
+  { key: "S3", label: "Portfolio Management Core" },
+  { key: "S4", label: "Execution & Performance" },
+  { key: "S5", label: "Governance & Roles" },
+  { key: "S6", label: "Organization, Culture & Mindset" },
+];
+
+const SUB_LABELS = {
+  "S1.1":"Leadership understanding","S1.2":"Evidence-based leadership","S1.3":"Leadership discipline & role-modeling","S1.4":"Organizational setup","S1.5":"Targets & incentives",
+  "S2.1":"Scenarios & outlook","S2.2":"Market sizing","S2.3":"External intelligence","S2.4":"Local market intelligence","S2.5":"Strategy translation","S2.6":"Investment logic",
+  "S3.1":"Portfolio architecture","S3.2":"Customer value","S3.3":"Intake management","S3.4":"Evaluation & validation","S3.5":"Prioritization rigor","S3.6":"Capacity & WIP management","S3.7":"Overall portfolio assessment","S3.8":"Portfolio phase out",
+  "S4.1":"Portfolio execution","S4.2":"Portfolio roll-out","S4.3":"Performance & benefits realization",
+  "S5.1":"Process design & documentation","S5.2":"Roles & rights","S5.3":"Meeting cadence & ceremonies","S5.4":"Escalation effectiveness","S5.5":"Tools & data","S5.6":"Funding model & discipline","S5.7":"Financial transparency",
+  "S6.1":"Organizational understanding","S6.2":"Organizational adaptability","S6.3":"Cultural openness","S6.4":"Learning","S6.5":"Skills & professionalization","S6.6":"Hardware-centric cultural inertia",
+};
+
+const IMPLEMENTATION_DETAILS = {
+  "S1.1": { rationale: "Without a shared vocabulary, leaders unconsciously apply core-business expectations (ROI horizon, certainty, risk tolerance) to transformational bets. Initiatives die not from bad ideas but from misaligned criteria.", steps: ["Conduct 1:1 interviews with 8–12 senior leaders to surface current mental models of 'innovation'","Facilitate a half-day alignment workshop to define 3 innovation types with explicit risk, time-to-value, and KPI profiles","Document the taxonomy as a one-page reference card and embed it in portfolio templates","Apply the taxonomy retrospectively to 5–10 current initiatives to test for clarity and edge cases","Roll out to extended leadership population through team sessions"], deliverables: "Innovation taxonomy reference card · Mapping of current portfolio to taxonomy · Updated portfolio review templates", owner: "Head of Strategy or Portfolio Lead, sponsored by CEO/BU Head", timeline: "4–6 weeks", kpis: "% of portfolio decisions referencing the taxonomy · Leadership self-rating on shared understanding (quarterly pulse)" },
+  "S1.2": { rationale: "Leaders who decide based on opinion and seniority send the message that evidence is optional. Teams stop investing in validation; bad initiatives survive too long.", steps: ["Define minimum evidence requirements per stage (discovery, validation, scale)","Train leaders on what 'good evidence' looks like for desirability, viability, and feasibility","Add an 'evidence check' as the first agenda item in every portfolio review","Empower portfolio managers to defer decisions when evidence is missing","Track and publish the % of decisions made with full evidence vs. exceptions"], deliverables: "Evidence requirement matrix · Leader training materials · Updated stage gate templates", owner: "Portfolio Lead, with active sponsorship from senior leadership", timeline: "8–12 weeks", kpis: "% of stage gates with full evidence packs · Reduction in late-stage initiative failures" },
+  "S1.3": { rationale: "Process discipline collapses the moment senior leaders bypass it. Shadow budgets and unilateral overrides signal that the official process is optional, eroding trust and adherence.", steps: ["Conduct a 'shadow audit' to surface all parallel investment flows and unauthorized initiatives","Senior leadership team publicly signs a role-modeling commitment with specific behaviors","Include process adherence in leadership performance reviews","Create a safe escalation route for portfolio managers to flag overrides","Publish quarterly 'discipline scorecard' covering all senior leaders"], deliverables: "Shadow budget audit report · Signed leadership commitment · Discipline scorecard template", owner: "CEO or BU Head — cannot be delegated", timeline: "12–16 weeks for cultural shift; ongoing reinforcement", kpis: "# of shadow initiatives / shadow budget € · # of process overrides per quarter · Leader adherence rating" },
+  "S1.4": { rationale: "Scattered decision-making creates duplication, internal competition for resources, and an inability to make portfolio-level trade-offs. No single owner means no single accountable view.", steps: ["Map all current investment decision forums and the decisions each makes","Design a single portfolio governance body with clear scope, authority, and decision rights","Appoint a Chief Portfolio Officer or equivalent with cross-functional authority","Sunset redundant forums and redirect their decisions into the new body","Establish reporting lines and information flows to the new governance structure"], deliverables: "Current-state decision forum map · Target governance design · Org chart and RACI · Transition plan", owner: "CEO/BU Head with COO and Head of Strategy", timeline: "16–24 weeks (organizational change)", kpis: "# of investment decision forums (reduction target) · Time from request to portfolio decision · Cross-functional alignment score" },
+  "S1.5": { rationale: "When KPIs reward only local product P&L, leaders rationally protect their initiatives — even failing ones — and resist resource reallocation. Incentives are the deepest lever for sustained behavior change.", steps: ["Audit current leadership KPIs and bonus structures against desired portfolio behaviors","Design portfolio-aligned KPIs: stop discipline, resource sharing, cross-portfolio outcomes","Pilot new KPIs with a subset of leaders in the next cycle","Adjust based on feedback and unintended consequences","Roll out across all leadership levels with HR partnership"], deliverables: "KPI audit · New incentive framework · HR alignment plan · Communication package", owner: "Head of HR with CEO/BU Head and Portfolio Lead", timeline: "6–12 months (next compensation cycle)", kpis: "% of leadership KPIs tied to portfolio outcomes · # of voluntary stop decisions · Resource fluidity index" },
+  "S2.1": { rationale: "Single-point forecasts assume a future that won't happen. Scenario testing makes the portfolio robust against multiple futures and creates pre-committed rebalancing triggers — preventing analysis paralysis when conditions shift.", steps: ["Identify 3–5 critical uncertainties affecting the portfolio (regulatory, technology, geopolitical)","Develop 2–3 scenarios using a 2x2 matrix of key uncertainties","Map each portfolio initiative against scenarios: which accelerate, stall, or stop in each","Define rebalancing triggers — specific market signals that initiate portfolio response","Review scenarios annually and refresh as new information emerges"], deliverables: "Scenario set with narratives · Portfolio-scenario mapping · Rebalancing trigger playbook", owner: "Head of Strategy with Portfolio Lead", timeline: "8–12 weeks for initial setup", kpis: "% of portfolio decisions stress-tested against scenarios · Time to react to triggered scenarios" },
+  "S2.2": { rationale: "Inconsistent market sizing methods make portfolio decisions uncomparable. Optimistic estimates inflate weak business cases; conservative ones kill strong ones. A single method enables apples-to-apples prioritization.", steps: ["Define the standard TAM/SAM/SOM methodology with explicit data sources and assumptions","Build a market sizing template with sensitivity analysis built in","Train initiative leads and portfolio managers on the method","Require all business cases to use the standard methodology","Calibrate periodically against actuals to improve accuracy"], deliverables: "Market sizing methodology document · Template with sensitivity analysis · Training materials", owner: "Head of Strategy or Market Intelligence", timeline: "6–10 weeks", kpis: "% of business cases using standard method · Forecast accuracy vs. actuals (12–24 months out)" },
+  "S2.3": { rationale: "Portfolios that don't continuously absorb external intelligence drift toward internal logic. Standing intelligence briefings keep the outside-in perspective alive and surface threats early.", steps: ["Identify 4–6 intelligence streams (competitor, regulatory, technology, customer, macro)","Assign an owner for each stream with a defined contribution format","Add a 15-minute 'outside-in briefing' to every portfolio review","Maintain a shared intelligence repository with searchable history","Quarterly 'so what' synthesis to identify portfolio implications"], deliverables: "Intelligence stream map with owners · Briefing template · Shared intelligence repository", owner: "Head of Strategy with stream owners across functions", timeline: "6–8 weeks setup; ongoing", kpis: "# of intelligence-triggered portfolio decisions · Coverage of key competitor moves within 30 days" },
+  "S2.4": { rationale: "Headquarters-centric portfolios miss regional regulatory, cultural, and competitive realities. Activating local intelligence prevents costly market entry failures and surfaces regional opportunities.", steps: ["Identify regional champions in 5–8 priority markets","Define a standard input format for regional market signals","Create a quarterly regional review preceding portfolio decisions","Build regional perspective into business case templates","Recognize and reward regional intelligence contributions"], deliverables: "Regional champion network · Standard regional input format · Updated business case templates", owner: "Head of Regions with Portfolio Lead", timeline: "10–14 weeks", kpis: "% of portfolio decisions incorporating regional input · Reduction in regional rollout surprises" },
+  "S2.5": { rationale: "Strategy that doesn't translate into measurable plays is wallpaper. Named plays with targets and owners create the bridge from strategic intent to portfolio choices.", steps: ["Decompose strategy into 5–10 named strategic plays with clear outcomes","Define measurable targets and owners for each play","Map every portfolio initiative to one (and only one) primary play","Reprioritize initiatives that don't fit any play","Review play progress quarterly and adjust portfolio mix accordingly"], deliverables: "Strategic play catalog · Initiative-play mapping · Quarterly play review template", owner: "Head of Strategy with executive sponsor per play", timeline: "8–12 weeks", kpis: "% of portfolio investment tied to strategic plays · Play-level outcome achievement" },
+  "S2.6": { rationale: "Without explicit horizon allocation, portfolios drift toward short-term core investment. Today's revenue gets fed; tomorrow's revenue starves. Explicit targets force conscious balance.", steps: ["Define horizons (e.g., H1 core, H2 adjacent, H3 transformational) with clear criteria","Set target allocation % per horizon based on strategy and growth ambition","Tag each current initiative by horizon","Compare current vs. target allocation; identify rebalancing actions","Review quarterly; adjust targets as strategy evolves"], deliverables: "Horizon framework with criteria · Current vs. target allocation report · Rebalancing actions", owner: "Portfolio Lead with Head of Strategy", timeline: "6–8 weeks initial; ongoing quarterly", kpis: "Allocation gap vs. target per horizon · H2/H3 investment as % of total" },
+  "S3.1": { rationale: "Without portfolio architecture, every initiative builds its own stack. Duplication explodes, integration breaks, and the cost of complexity overwhelms the benefit of any individual initiative.", steps: ["Map current portfolio architecture: shared vs. duplicated components","Define target architecture with modular, reusable building blocks","Appoint a chief architect role with cross-product authority","Establish architecture review as a stage gate for new initiatives","Plan and execute a rationalization roadmap for legacy duplication"], deliverables: "Current and target architecture maps · Architecture review process · Rationalization roadmap", owner: "Chief Architect (new role) with CTO and Portfolio Lead", timeline: "16–24 weeks initial; ongoing", kpis: "% of new initiatives leveraging shared components · # of duplicate components reduced" },
+  "S3.2": { rationale: "Function-centric portfolios optimize internal metrics while customer experience fragments across hand-offs. Value-stream organization aligns the portfolio with how customers actually consume.", steps: ["Identify the 5–7 critical customer value streams","Map current initiatives against value streams to surface gaps and overlaps","Restructure portfolio reviews around value streams, not internal functions","Define customer outcome metrics per value stream as primary KPIs","Appoint value stream owners with cross-functional authority"], deliverables: "Value stream map · Initiative-to-stream mapping · Value stream owner appointments · New review structure", owner: "Portfolio Lead with Head of Customer Experience", timeline: "12–20 weeks", kpis: "% of portfolio reviews structured by value stream · Customer outcome metrics per stream" },
+  "S3.3": { rationale: "Multiple intake channels enable politically powerful sponsors to bypass scrutiny, leading to a portfolio that reflects influence rather than value. A single channel forces fair comparison.", steps: ["Audit all current intake channels and surface bypass routes","Design a single intake process with clear triage criteria","Build an intake tool that captures the necessary minimum information","Communicate that all requests must go through the single channel","Track and report on intake volume, triage outcomes, and cycle time"], deliverables: "Intake process design · Intake tool/template · Triage criteria · Communication plan", owner: "Portfolio Lead with PMO", timeline: "4–8 weeks", kpis: "% of investment decisions originating from official intake · Triage cycle time" },
+  "S3.4": { rationale: "Single-lens evaluation (usually financial) misses fatal flaws on the desirability, feasibility, or contextual axes. A four-dimensional framework catches blind spots before commitment.", steps: ["Adopt or adapt a four-dimensional evaluation framework (desirability, viability, feasibility, context)","Build evaluation templates and scoring rubrics per dimension","Train evaluators and decision-makers on each dimension","Make all four dimensions mandatory at every stage gate","Track quality of evaluation against initiative outcomes for calibration"], deliverables: "Four-dimensional framework · Evaluation templates · Training materials · Updated gate criteria", owner: "Portfolio Lead with product, technology, design, and finance leads", timeline: "8–12 weeks", kpis: "% of stage gates using full four-dimensional evaluation · Reduction in late-stage failures" },
+  "S3.5": { rationale: "Prioritization based purely on value and cost ignores timing. Some initiatives lose 80% of their value if delayed six months; others lose almost nothing. Cost of delay surfaces this critical dimension.", steps: ["Define cost-of-delay categories: market window, dependency unblocking, regulatory deadline","Build a simple cost-of-delay estimation method (qualitative scoring or financial proxy)","Add cost of delay to the prioritization model alongside value and risk","Recalculate priority for current backlog using new model","Use weighted shortest job first (WSJF) or equivalent for sequencing"], deliverables: "Cost-of-delay framework · Updated prioritization model · Reprioritized backlog", owner: "Portfolio Lead with finance and product", timeline: "6–10 weeks", kpis: "% of initiatives prioritized using cost of delay · # of missed market windows (reduction)" },
+  "S3.6": { rationale: "Portfolios that authorize more work than can be done create destructive multitasking, missed commitments, and burnout. Capacity reality-check at the funnel — before authorization — prevents this.", steps: ["Establish a current-state capacity baseline (people, budget) per team and skill area","Build a simple capacity reservation system tied to initiative authorization","Set explicit WIP limits per portfolio stage and per critical resource","Require capacity confirmation before any new authorization","Track and report capacity utilization vs. plan"], deliverables: "Capacity baseline · WIP limits · Capacity reservation process · Reporting dashboard", owner: "Portfolio Lead with resource managers", timeline: "8–12 weeks", kpis: "% of initiatives authorized with confirmed capacity · WIP adherence · On-time delivery rate" },
+  "S3.7": { rationale: "Without a portfolio-level health view, decisions are made initiative-by-initiative — missing aggregate risk concentration, USP erosion, and competitive lag. A vitality dashboard makes the whole visible.", steps: ["Define portfolio vitality dimensions: financial mix, USP defendability, aggregate risk, time-to-market","Source benchmark data on market averages and competitor lead times","Build a one-page portfolio vitality dashboard","Review vitality quarterly with senior leadership","Tie vitality findings to rebalancing actions"], deliverables: "Vitality dimension definitions · Benchmark data sources · Vitality dashboard · Quarterly review format", owner: "Portfolio Lead with finance and competitive intelligence", timeline: "10–14 weeks", kpis: "Vitality dashboard adoption · # of portfolio actions triggered by vitality findings" },
+  "S3.8": { rationale: "Portfolios that never prune become bloated, fragmented, and unfocused. Disciplined pruning frees resources, sharpens focus, and signals that stopping is a normal, valued outcome.", steps: ["Establish quarterly portfolio rebalancing cycles with defined criteria","Define stop triggers: evidence gaps, market shifts, capacity strain, strategic misfit","Normalize stop decisions through leadership communication and recognition","Build a 'graceful sunset' playbook for stopped initiatives (knowledge capture, team redeployment)","Track and celebrate well-executed stops alongside successful launches"], deliverables: "Quarterly rebalancing process · Stop trigger criteria · Sunset playbook · Recognition program", owner: "Portfolio Lead with senior leadership team", timeline: "6–10 weeks", kpis: "# of intentional stops per quarter · Resources freed for higher-value work · % of teams redeployed cleanly" },
+  "S4.1": { rationale: "Decisions that don't convert into named owners, timelines, and resource commitments stay on paper. Execution discipline starts with translating every decision into an actionable plan.", steps: ["Create a standard execution plan template (owner, timeline, resources, dependencies, milestones)","Require every portfolio decision to produce a complete execution plan within 5 working days","Review translation rate and quality at portfolio reviews","Track milestone adherence and flag deviations early","Use deviations as portfolio learning, not just operational issues"], deliverables: "Execution plan template · Translation cycle process · Tracking dashboard", owner: "Portfolio Lead with PMO", timeline: "4–8 weeks", kpis: "% of decisions with execution plans within 5 days · Milestone adherence rate" },
+  "S4.2": { rationale: "Roll-out as an afterthought is the #1 cause of value leakage. Initiatives ship but don't land — supply chain, sales, operations weren't ready. Integrating go-to-market early ensures the value actually reaches customers.", steps: ["Make go-to-market readiness a mandatory stage gate deliverable","Define readiness criteria per function: supply chain, sales, ops, marketing, support","Require GTM owner participation in portfolio reviews from validation stage onwards","Build a roll-out readiness checklist with measurable indicators","Track readiness vs. launch date; postpone launches with gaps"], deliverables: "Updated stage gate criteria · GTM readiness checklist · Cross-functional review template", owner: "Portfolio Lead with GTM, sales ops, supply chain leads", timeline: "12–16 weeks", kpis: "% of launches with full GTM readiness · Time-to-revenue post-launch" },
+  "S4.3": { rationale: "Portfolios that don't measure realized value can't learn. Forecasts stay optimistic forever, and the same mistakes get made initiative after initiative. Closing the loop transforms portfolio decisions from gambling into informed bets.", steps: ["Define expected outcomes per initiative at authorization (adoption, revenue, time-to-value, NPS)","Track actuals against expectations at defined intervals (3, 6, 12 months post-launch)","Hold quarterly portfolio retrospectives on forecast accuracy","Feed learnings into prioritization weights and business case templates","Recognize teams whose forecasts are accurate, not just optimistic"], deliverables: "Expected vs. actual tracking framework · Quarterly retro format · Forecast calibration log", owner: "Portfolio Lead with finance and product", timeline: "12–20 weeks for full cycle", kpis: "Forecast accuracy index · % of initiatives with post-launch measurement · # of learnings applied" },
+  "S5.1": { rationale: "Undocumented processes live only in people's heads — they vary by person, decay over time, and create dependency on specific individuals. Documentation embedded in the QMS makes adherence mandatory and measurable.", steps: ["Document the end-to-end portfolio process: roles, decisions, gates, templates","Publish in an accessible format (wiki, intranet, QMS)","Integrate with the corporate QMS so non-adherence triggers audit findings","Maintain a clear version history and change-management process","Onboard all portfolio participants on the documented process"], deliverables: "Process documentation · QMS integration · Onboarding materials", owner: "Portfolio Lead with Quality function", timeline: "6–10 weeks", kpis: "Process documentation completeness · Adherence rate measured via audits" },
+  "S5.2": { rationale: "Ambiguous decision rights are the most common cause of slow, conflict-laden portfolio decisions. RACI clarity allows the right people to decide quickly and others to support without confusion.", steps: ["Identify all key portfolio decisions (prioritization, authorization, stop, escalation)","Build a RACI for each decision type","Validate with affected roles and adjust","Embed RACI in process documentation and onboarding","Enforce through regular adherence audits"], deliverables: "Portfolio RACI · Updated process documentation · Audit checklist", owner: "Portfolio Lead with HR and process owners", timeline: "4–6 weeks", kpis: "Decision cycle time · # of escalations due to unclear rights" },
+  "S5.3": { rationale: "Inconsistent meeting cadence creates information asymmetry, late decisions, and rework. A predictable cadence at all flight levels ensures the right conversations happen at the right altitude on time.", steps: ["Define meeting cadence per flight level: strategic (quarterly), value stream (monthly), product (weekly)","Standardize agendas, attendees, and decision rights per meeting type","Synchronize cadences so decisions flow up and down predictably","Track meeting effectiveness (decisions made, actions tracked)","Eliminate or merge redundant meetings"], deliverables: "Cadence map · Standard meeting agendas · Effectiveness tracking", owner: "Portfolio Lead with PMO", timeline: "4–8 weeks", kpis: "Meeting decision rate · % of decisions made on planned cadence vs. ad-hoc" },
+  "S5.4": { rationale: "Cross-portfolio conflicts and blocking dependencies sap velocity when there's no clear escalation route. Effective escalation paths resolve issues fast and signal that the system has the authority to act.", steps: ["Map common escalation scenarios: resource conflicts, dependency blockers, scope disputes, governance gaps","Define escalation routes and decision authority for each scenario","Set service-level commitments for escalation response time","Train portfolio managers and team leads on when and how to escalate","Track escalation volume and resolution time to spot systemic issues"], deliverables: "Escalation map · SLAs · Training · Resolution tracking", owner: "Portfolio Lead with senior leadership", timeline: "6–10 weeks", kpis: "Escalation resolution time · # of unresolved escalations · % of blockers cleared within SLA" },
+  "S5.5": { rationale: "Fragmented tools mean fragmented data, manual stitching, and stale reporting. Decisions get made on out-of-date information. A single source of truth turns the portfolio from opaque to live.", steps: ["Audit current portfolio tooling and identify data fragmentation","Define target data model and integration architecture","Select or build an integration layer connecting key systems (PPM, finance, HR, product)","Migrate reporting from manual stitching to live dashboards","Establish data governance: definitions, ownership, quality"], deliverables: "Tool audit · Target architecture · Integration plan · Live dashboards · Data governance", owner: "Portfolio Lead with IT and data team", timeline: "16–28 weeks", kpis: "Report cycle time (target: real-time) · Data quality score · # of manual workarounds eliminated" },
+  "S5.6": { rationale: "Annual fixed budgets force decisions to be made when uncertainty is highest and lock in capital for 12 months regardless of evidence. Rolling, milestone-based funding aligns investment with learning.", steps: ["Pilot rolling funding for a subset of the portfolio (initially H2/H3 investments)","Define milestone-based release criteria with explicit go/no-go gates","Reserve unallocated capacity for in-year reallocation","Adjust finance processes (forecasting, accruals, reporting) to support rolling model","Scale the approach as confidence builds"], deliverables: "Funding model design · Pilot plan · Updated finance processes · Scale plan", owner: "CFO with Portfolio Lead", timeline: "12–24 weeks for pilot; 12+ months for full rollout", kpis: "% of portfolio funded on rolling basis · Reallocation velocity · Stop decisions enabled by milestone gating" },
+  "S5.7": { rationale: "When investment can't be traced from portfolio allocation down to team and feature spend, accountability and learning both break. End-to-end traceability connects strategic intent with operational reality.", steps: ["Define a common allocation taxonomy (portfolio → product → team → initiative)","Connect financial systems to portfolio systems via the taxonomy","Build planned-vs-actual views at every level","Train finance and portfolio teams on the unified view","Make traceability data available real-time to decision-makers"], deliverables: "Allocation taxonomy · System integrations · Multi-level reporting views", owner: "CFO with Portfolio Lead and IT", timeline: "16–24 weeks", kpis: "% of spend traceable to portfolio allocation · Reporting freshness (target: daily)" },
+  "S6.1": { rationale: "Process compliance without understanding produces malicious obedience — checkboxes ticked without value created. Literacy programs build the 'why' so people execute with judgment, not just discipline.", steps: ["Design role-specific learning modules: executive, portfolio manager, contributor, support functions","Combine self-paced content with live cohort sessions","Include real cases and decisions from your own portfolio history","Reinforce learning through coaching at portfolio review meetings","Refresh annually as the process evolves"], deliverables: "Learning curriculum · Role-specific modules · Cohort calendar · Coaching guide", owner: "Portfolio Lead with Learning & Development", timeline: "10–16 weeks for initial rollout", kpis: "Coverage of target population · Learner assessment scores · Behavioral change observed in reviews" },
+  "S6.2": { rationale: "Process changes that ignore the human side fail. Resistance, anxiety, and old behaviors override new tools and templates. Structured change management is the difference between adopted and shelved.", steps: ["Build a stakeholder map with impact and influence for each portfolio change","Develop a communication plan tailored to stakeholder needs","Identify and engage change champions across the organization","Surface and address resistance early through dialog, not enforcement","Measure adoption alongside operational metrics"], deliverables: "Stakeholder map · Communication plan · Champion network · Adoption metrics", owner: "Portfolio Lead with HR/OD support", timeline: "Parallel to each major change", kpis: "Adoption rate · Stakeholder sentiment · Time from rollout to behavior change" },
+  "S6.3": { rationale: "Cultures that reflexively build everything in-house miss faster, cheaper, better external options. Normalizing buy/partner/invest as equally legitimate expands what's possible and signals strategic flexibility.", steps: ["Add buy/partner/invest as explicit options in every business case","Build M&A, partnership, and venture capabilities (or partner with internal corp dev)","Celebrate successful partnerships and acquisitions with the same visibility as launches","Train portfolio managers in partner sourcing and partnership management","Track ratio of build vs. buy/partner over time as a leading indicator"], deliverables: "Updated business case template · Partnership capability · Recognition mechanisms · Tracking metrics", owner: "Head of Strategy with Corp Dev and Portfolio Lead", timeline: "12–24 weeks for capability + cultural shift over multiple cycles", kpis: "Build:buy:partner ratio · Time-to-market via partnership vs. build · Partnership success rate" },
+  "S6.4": { rationale: "Portfolios that don't systematically capture learning repeat the same mistakes initiative after initiative. Embedded retrospectives turn each decision into organizational capability.", steps: ["Conduct decision retrospectives after every major portfolio gate","Compare forecasts to outcomes at 3, 6, 12 months post-launch","Synthesize patterns across retrospectives quarterly","Feed learnings into templates, criteria, and training","Recognize teams who openly share what didn't work"], deliverables: "Retrospective template · Outcome tracking · Pattern synthesis report · Template updates", owner: "Portfolio Lead with PMO", timeline: "Ongoing; visible impact in 2–3 cycles", kpis: "% of decisions with retros · # of learnings applied · Forecast accuracy improvement" },
+  "S6.5": { rationale: "Portfolio management is a discipline, not an accidental career. Without defined competencies, paths, and community, talent leaves and quality varies dramatically by individual.", steps: ["Define portfolio management competency model (skills, behaviors, experiences)","Build a learning path from entry to senior portfolio manager","Establish a community of practice with regular knowledge exchange","Secure executive sponsorship and create visibility for the discipline","Recognize and promote based on competency progression"], deliverables: "Competency model · Learning paths · Community of practice · Career framework", owner: "Portfolio Lead with HR and Learning & Development", timeline: "12–20 weeks for design; ongoing community", kpis: "% of portfolio managers meeting competency targets · Retention · Internal promotion rate" },
+  "S6.6": { rationale: "Software locked to hardware release cycles is software penalized for being software. Decoupling enables continuous improvement, faster customer feedback, and competitive parity with software-native rivals.", steps: ["Map current software-hardware dependencies and identify decoupling opportunities","Define integration interfaces that allow independent release cycles","Build separate roadmaps and release cadences for software and hardware","Establish DevOps capability for continuous software delivery","Educate go-to-market and customers on the new model"], deliverables: "Dependency map · Interface definitions · Separate roadmaps · DevOps capability · GTM enablement", owner: "CTO with Portfolio Lead and Product", timeline: "20–36 weeks (deep technical and cultural change)", kpis: "Software release frequency · Customer-perceived agility · Time from feature decision to delivery" },
+};
+
+const RECOMMENDATIONS_LIBRARY = [
+  { section: "S1", trigger: "S1.1", baseBenefit: 3, baseEffort: 1, title: "Establish shared innovation type taxonomy", description: "Run a leadership alignment workshop to define and adopt a common vocabulary for innovation types (core, adjacent, transformational), including risk profiles, timelines, and resource needs." },
+  { section: "S1", trigger: "S1.2", baseBenefit: 3, baseEffort: 2, title: "Introduce evidence-based stage gates", description: "Mandate evidence requirements at each portfolio decision point. Train leaders to ask for stage-appropriate artifacts and to stop initiatives where evidence is missing." },
+  { section: "S1", trigger: "S1.3", baseBenefit: 3, baseEffort: 2, title: "Leadership role-modeling pact", description: "Senior leaders publicly commit to the portfolio process — no shadow budgets, no parallel initiatives, no unilateral overrides. Track adherence in leadership reviews." },
+  { section: "S1", trigger: "S1.4", baseBenefit: 3, baseEffort: 3, title: "Centralize portfolio investment decisions", description: "Consolidate scattered investment decisions into a single portfolio process. Define a clear owner with cross-functional authority and access to senior leadership." },
+  { section: "S1", trigger: "S1.5", baseBenefit: 2, baseEffort: 3, title: "Realign incentives to portfolio goals", description: "Redesign KPIs and bonus structures so that effective stop decisions, resource sharing, and cross-portfolio collaboration are rewarded — not just local product performance." },
+  { section: "S2", trigger: "S2.1", baseBenefit: 2, baseEffort: 2, title: "Build scenario-based portfolio testing", description: "Map the portfolio against 2–3 future scenarios. Stress-test which initiatives accelerate or stop under each scenario, and define rebalancing triggers." },
+  { section: "S2", trigger: "S2.2", baseBenefit: 2, baseEffort: 2, title: "Standardize market sizing methodology", description: "Define a single TAM/SAM/SOM methodology used for all portfolio decisions. Combine validated external data with calibrated expert judgment." },
+  { section: "S2", trigger: "S2.3", baseBenefit: 2, baseEffort: 2, title: "Embed external intelligence in reviews", description: "Add competitive, regulatory, and technology trend briefings as a standing input to portfolio review meetings. Assign owners for each intelligence stream." },
+  { section: "S2", trigger: "S2.4", baseBenefit: 3, baseEffort: 2, title: "Activate regional intelligence channel", description: "Establish structured channels for regional teams to feed local market insight into portfolio decisions — especially regulatory, cultural, and competitive nuances." },
+  { section: "S2", trigger: "S2.5", baseBenefit: 3, baseEffort: 2, title: "Translate strategy into measurable plays", description: "Convert strategy into named strategic plays with measurable targets, owners, and review cycles. Link every portfolio investment to at least one play." },
+  { section: "S2", trigger: "S2.6", baseBenefit: 2, baseEffort: 2, title: "Adopt explicit horizon allocation logic", description: "Define investment allocation across horizons (e.g., H1/H2/H3 or core/adjacent/future) with explicit targets. Review and rebalance quarterly." },
+  { section: "S3", trigger: "S3.1", baseBenefit: 3, baseEffort: 3, title: "Define portfolio architecture", description: "Establish modular, reusable business and technical components across the portfolio. Appoint a chief architect role with cross-product governance authority." },
+  { section: "S3", trigger: "S3.2", baseBenefit: 3, baseEffort: 2, title: "Anchor portfolio in customer value streams", description: "Restructure portfolio reviews around end-to-end customer journeys and value streams instead of internal functions. Make customer outcome metrics the primary success measure." },
+  { section: "S3", trigger: "S3.3", baseBenefit: 2, baseEffort: 1, title: "Single intake channel with screening criteria", description: "Create one canonical intake process for all investment requests. Define triage criteria and screen all opportunities through it — no bypass routes." },
+  { section: "S3", trigger: "S3.4", baseBenefit: 3, baseEffort: 2, title: "Apply four-dimensional evaluation framework", description: "Evaluate every portfolio decision against desirability, viability, feasibility, and contextual fit. Make the framework mandatory at each stage gate." },
+  { section: "S3", trigger: "S3.5", baseBenefit: 3, baseEffort: 2, title: "Introduce cost-of-delay prioritization", description: "Add quantified cost of delay to the prioritization model alongside value and risk. Use it especially for high-leverage initiatives where timing matters." },
+  { section: "S3", trigger: "S3.6", baseBenefit: 3, baseEffort: 2, title: "Capacity reality-check before authorization", description: "Mandate a formal capacity and budget reality-check before any portfolio scenario is authorized. Prevent overallocation by enforcing WIP limits at the funnel." },
+  { section: "S3", trigger: "S3.7", baseBenefit: 2, baseEffort: 2, title: "Portfolio vitality dashboard", description: "Build a continuous view of portfolio health — financial vitality, USP defendability, aggregate risk — benchmarked against market averages and competitor lead times." },
+  { section: "S3", trigger: "S3.8", baseBenefit: 3, baseEffort: 1, title: "Disciplined portfolio pruning cadence", description: "Set quarterly rebalancing cycles with defined triggers (e.g., evidence gaps, market shifts). Make stop and sunset decisions a normal portfolio output, not a crisis response." },
+  { section: "S4", trigger: "S4.1", baseBenefit: 2, baseEffort: 2, title: "Translate decisions into execution plans", description: "Every portfolio decision must produce an execution plan with named owner, timeline, and resource commitment. Track translation rate as a portfolio KPI." },
+  { section: "S4", trigger: "S4.2", baseBenefit: 3, baseEffort: 3, title: "Integrate go-to-market into portfolio gates", description: "Add downstream readiness (supply chain, sales, operations) as mandatory deliverables at portfolio gates. Roll-out should not be an afterthought." },
+  { section: "S4", trigger: "S4.3", baseBenefit: 3, baseEffort: 2, title: "Close the performance feedback loop", description: "Track expected vs. actual outcomes (adoption, revenue, time-to-value) for every initiative. Feed insights back into prioritization and forecasting calibration." },
+  { section: "S5", trigger: "S5.1", baseBenefit: 2, baseEffort: 1, title: "Document and embed the portfolio process", description: "Produce concise, accessible portfolio process documentation. Integrate with QMS so adherence becomes mandatory rather than optional." },
+  { section: "S5", trigger: "S5.2", baseBenefit: 2, baseEffort: 1, title: "Clarify decision rights and accountabilities", description: "Build a RACI for every portfolio role. Make decision rights explicit, enforced, and respected — especially for stop and pivot decisions." },
+  { section: "S5", trigger: "S5.3", baseBenefit: 1, baseEffort: 1, title: "Establish consistent meeting cadence", description: "Set a regular review cadence at all flight levels (strategic, value stream, product). Apply governance rules uniformly across all portfolio elements." },
+  { section: "S5", trigger: "S5.4", baseBenefit: 2, baseEffort: 2, title: "Build effective escalation paths", description: "Define escalation routes for cross-portfolio conflicts and dependency issues. Ensure governance bodies have the authority and speed to resolve them." },
+  { section: "S5", trigger: "S5.5", baseBenefit: 3, baseEffort: 3, title: "Single source of truth for portfolio data", description: "Integrate fragmented portfolio tools into one live dashboard covering pipeline, capacity, financials, and value realization. Eliminate manual report stitching." },
+  { section: "S5", trigger: "S5.6", baseBenefit: 3, baseEffort: 3, title: "Move to rolling, evidence-based funding", description: "Replace annual fixed budgets with milestone-based funding releases. Tie continued investment to evidence of value, with clear go/no-go criteria at each stage." },
+  { section: "S5", trigger: "S5.7", baseBenefit: 2, baseEffort: 2, title: "End-to-end investment traceability", description: "Connect portfolio-level allocations down to product, team, and initiative spend. Make planned-vs-actual visible in real time at every level." },
+  { section: "S6", trigger: "S6.1", baseBenefit: 2, baseEffort: 1, title: "Roll out portfolio process literacy program", description: "Run targeted education sessions so all stakeholders understand the portfolio process, their role in it, and the rationale behind it." },
+  { section: "S6", trigger: "S6.2", baseBenefit: 2, baseEffort: 2, title: "Build organizational change capability", description: "Apply structured change management to portfolio process improvements. Include stakeholder mapping, communication plans, and resistance management." },
+  { section: "S6", trigger: "S6.3", baseBenefit: 3, baseEffort: 3, title: "Normalize buy/partner/invest as equals to build", description: "Shift culture so that build, buy, partner, and invest are treated as genuinely equal options. Celebrate and learn from successful partnerships." },
+  { section: "S6", trigger: "S6.4", baseBenefit: 2, baseEffort: 2, title: "Embed continuous learning into portfolio cycle", description: "Capture decision retrospectives systematically. Compare forecasts to outcomes and feed lessons back into templates, criteria, and skill development." },
+  { section: "S6", trigger: "S6.5", baseBenefit: 2, baseEffort: 2, title: "Professionalize portfolio management discipline", description: "Define competency profiles, learning paths, and career tracks for portfolio managers. Build a community of practice with executive sponsorship." },
+  { section: "S6", trigger: "S6.6", baseBenefit: 3, baseEffort: 3, title: "Decouple software cycles from hardware cadence", description: "Separate software/digital delivery from hardware release cycles. Enable independent DevOps cadence with defined integration interfaces." },
+];
+
+const FONT_HEADLINE = "'Bree Serif','Bree','SH-Bree-Headline','Calibri',sans-serif";
+const FONT_BODY = "'Calibri','Segoe UI',sans-serif";
+
+const hexToRgba = (hex, alpha) => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+};
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+
+/* Deterministic seeded random so the profile (and therefore recommendations
+   matrix layout) is stable across sessions. Same seed used as the prior
+   Portfolio Maturity artifact's "own-company" profile. */
+const seedHash = s => { let h=0; for(let i=0;i<s.length;i++) h=((h<<5)-h+s.charCodeAt(i))|0; return h; };
+const srand = (s, i) => { const x=Math.sin(seedHash(s)+i*9301+49297)*49297; return x-Math.floor(x); };
+
+const generateProfile = (seed = "own-company-recs", base = 2.6, variance = 0.9) => {
+  const profile = {};
+  let ix = 0;
+  SECTIONS.forEach(s => {
+    profile[s.key] = Math.max(1, Math.min(5, base + (srand(seed, ix++) - 0.5) * variance * 2));
+  });
+  Object.keys(SUB_LABELS).forEach(subKey => {
+    const sectionKey = subKey.split(".")[0];
+    const sectionScore = profile[sectionKey] || base;
+    profile[subKey] = Math.max(1, Math.min(5, sectionScore + (srand(seed, ix++) - 0.5) * 1.4));
+  });
+  return profile;
+};
+
+const generateRecommendations = (profile) => {
+  const scored = RECOMMENDATIONS_LIBRARY.map(rec => {
+    const subScore = profile[rec.trigger];
+    const sectionScore = profile[rec.section];
+    if (subScore == null && sectionScore == null) return null;
+    const referenceScore = subScore != null ? subScore : sectionScore;
+    if (referenceScore >= 3.5) return null;
+    const boost = Math.max(0, (3.0 - referenceScore) * 0.75);
+    const dynamicBenefit = Math.min(3, rec.baseBenefit + boost * 0.4);
+    return {
+      ...rec,
+      currentScore: referenceScore,
+      benefit: dynamicBenefit,
+      effort: rec.baseEffort,
+      priority: dynamicBenefit / rec.baseEffort,
+    };
+  }).filter(r => r !== null);
+  scored.sort((a, b) => b.priority - a.priority);
+  const counters = { S1:0, S2:0, S3:0, S4:0, S5:0, S6:0 };
+  scored.forEach(rec => { counters[rec.section]++; rec.numberInSection = counters[rec.section]; });
+  return scored;
+};
+
+/* =================================
+   STATE
+   ================================= */
+const state = {
+  hoveredKey: null,    // `${section}-${numberInSection}` for hover
+  selectedKey: null,   // for modal
+};
+const profile = generateProfile();
+const recommendations = generateRecommendations(profile);
+
+/* =================================
+   RENDERERS
+   ================================= */
+
+function renderHeader() {
+  return `<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid ${SH.grey300};gap:20px;flex-wrap:wrap;">
+    <div>
+      <h1 style="font-size:27px;font-family:${FONT_HEADLINE};font-weight:700;color:${SH.orange};margin:0;line-height:1.1;letter-spacing:-0.01em;">Portfolio Management Maturity</h1>
+      <h2 style="font-size:27px;font-family:${FONT_HEADLINE};font-weight:700;color:${SH.black};margin:2px 0 0 0;line-height:1.1;letter-spacing:-0.01em;">Improvement Recommendations</h2>
+    </div>
+    <div style="text-align:right;line-height:1;">
+      <div style="font-family:'Calibri','Siemens Sans','Arial',sans-serif;font-size:17px;font-weight:700;color:${SH.petrol};letter-spacing:0.8px;">SIEMENS</div>
+      <div style="font-family:${FONT_HEADLINE};font-size:19px;font-weight:700;color:${SH.orange};margin-top:3px;">Healthineers</div>
+    </div>
+  </div>`;
+}
+
+function renderContextBanner() {
+  return `<div style="font-size:14px;color:${SH.black};margin-bottom:20px;padding:10px 14px;background:${SH.grey50};border-left:4px solid ${SH.orange};">
+    <strong>${recommendations.length} actions identified</strong>, prioritized by benefit-to-effort ratio.
+    Color = section. Number = priority within section.
+    <span style="color:${SH.grey600};">Click any recommendation for full implementation details.</span>
+  </div>`;
+}
+
+function renderMatrix() {
+  const width = 600, height = 480;
+  const padding = { top: 30, right: 40, bottom: 60, left: 70 };
+  const chartW = width - padding.left - padding.right;
+  const chartH = height - padding.top - padding.bottom;
+  const xPos = e => padding.left + ((e - 0.5) / 3) * chartW;
+  const yPos = b => padding.top + chartH - ((b - 0.5) / 3) * chartH;
+
+  const placed = recommendations.map(rec => ({
+    ...rec,
+    roundedEffort: Math.round(rec.effort * 4) / 4,
+    roundedBenefit: Math.round(rec.benefit * 4) / 4,
+  }));
+  const positioned = placed.map((rec, idx) => {
+    const overlaps = placed.filter((r, j) =>
+      j < idx &&
+      Math.abs(r.roundedEffort - rec.roundedEffort) < 0.1 &&
+      Math.abs(r.roundedBenefit - rec.roundedBenefit) < 0.1
+    );
+    const offsetCount = overlaps.length;
+    const angle = (offsetCount * 137.5) * (Math.PI / 180);
+    const radius = offsetCount > 0 ? 18 + Math.floor(offsetCount / 6) * 8 : 0;
+    return {
+      ...rec,
+      x: xPos(rec.effort) + Math.cos(angle) * radius,
+      y: yPos(rec.benefit) + Math.sin(angle) * radius,
+    };
+  });
+
+  const grid = [1,2].map(i => `
+    <line x1="${padding.left + (i/3)*chartW}" x2="${padding.left + (i/3)*chartW}" y1="${padding.top}" y2="${padding.top + chartH}" stroke="${SH.grey300}" stroke-width="0.5" stroke-dasharray="3,3"/>
+    <line x1="${padding.left}" x2="${padding.left + chartW}" y1="${padding.top + (i/3)*chartH}" y2="${padding.top + (i/3)*chartH}" stroke="${SH.grey300}" stroke-width="0.5" stroke-dasharray="3,3"/>
+  `).join('');
+
+  const bubbles = positioned.map(rec => {
+    const key = `${rec.section}-${rec.numberInSection}`;
+    const isHovered = state.hoveredKey === key;
+    const color = SECTION_COLORS[rec.section];
+    return `<g class="bubble-grp" data-action="hover" data-key="${key}" style="cursor:pointer;">
+      <circle class="rec-bubble" cx="${rec.x}" cy="${rec.y}" r="${isHovered?16:13}" fill="${color}" stroke="${SH.white}" stroke-width="2" style="filter:${isHovered?'drop-shadow(0 2px 6px rgba(0,0,0,0.25))':'none'};"/>
+      <text x="${rec.x}" y="${rec.y + 4}" text-anchor="middle" style="font-size:12px;fill:${SH.white};font-weight:700;pointer-events:none;user-select:none;">${rec.numberInSection}</text>
+    </g>`;
+  }).join('');
+
+  let tooltip = '';
+  if (state.hoveredKey) {
+    const pos = positioned.find(p => `${p.section}-${p.numberInSection}` === state.hoveredKey);
+    if (pos) {
+      const tooltipW = 240, tooltipH = 70;
+      let tx = pos.x + 22, ty = pos.y - tooltipH/2;
+      if (tx + tooltipW > width) tx = pos.x - 22 - tooltipW;
+      if (ty < padding.top) ty = padding.top;
+      if (ty + tooltipH > padding.top + chartH) ty = padding.top + chartH - tooltipH;
+      const sectionLabel = SECTIONS.find(s => s.key === pos.section)?.label || '';
+      tooltip = `<g style="pointer-events:none;">
+        <rect x="${tx}" y="${ty}" width="${tooltipW}" height="${tooltipH}" fill="${SH.black}" rx="2" opacity="0.92"/>
+        <text x="${tx + 10}" y="${ty + 18}" style="font-size:11px;fill:${SECTION_COLORS[pos.section]};font-weight:700;">${esc(sectionLabel)} · #${pos.numberInSection}</text>
+        <foreignObject x="${tx + 10}" y="${ty + 24}" width="${tooltipW - 20}" height="${tooltipH - 30}">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="font-size:12px;color:${SH.white};font-family:${FONT_BODY};line-height:1.3;font-weight:600;">${esc(pos.title)}</div>
+        </foreignObject>
+      </g>`;
+    }
+  }
+
+  return `<svg viewBox="0 0 ${width} ${height}" style="width:100%;max-width:${width}px;">
+    <rect x="${padding.left}" y="${padding.top}" width="${chartW}" height="${chartH}" fill="${SH.grey50}" stroke="${SH.grey300}" stroke-width="1"/>
+    ${grid}
+    <rect x="${padding.left}" y="${padding.top}" width="${chartW/3}" height="${chartH/3}" fill="${hexToRgba(SH.petrol,0.06)}" stroke="none"/>
+    <text x="${padding.left + chartW/6}" y="${padding.top + 16}" text-anchor="middle" style="font-size:10px;fill:${SH.petrol};font-weight:700;letter-spacing:0.1em;">QUICK WINS</text>
+
+    <line x1="${padding.left}" x2="${padding.left + chartW}" y1="${padding.top + chartH}" y2="${padding.top + chartH}" stroke="${SH.black}" stroke-width="1.5"/>
+    <text x="${padding.left + 6}" y="${padding.top + chartH + 22}" style="font-size:11px;fill:${SH.grey600};">Low</text>
+    <text x="${padding.left + chartW/2}" y="${padding.top + chartH + 22}" text-anchor="middle" style="font-size:11px;fill:${SH.grey600};">Medium</text>
+    <text x="${padding.left + chartW - 6}" y="${padding.top + chartH + 22}" text-anchor="end" style="font-size:11px;fill:${SH.grey600};">High</text>
+    <text x="${padding.left + chartW/2}" y="${height - 12}" text-anchor="middle" style="font-size:14px;fill:${SH.black};font-weight:700;">Implementation Effort</text>
+
+    <line x1="${padding.left}" x2="${padding.left}" y1="${padding.top}" y2="${padding.top + chartH}" stroke="${SH.black}" stroke-width="1.5"/>
+    <text x="${padding.left - 8}" y="${padding.top + 6}" text-anchor="end" style="font-size:11px;fill:${SH.grey600};">High</text>
+    <text x="${padding.left - 8}" y="${padding.top + chartH/2}" text-anchor="end" style="font-size:11px;fill:${SH.grey600};">Medium</text>
+    <text x="${padding.left - 8}" y="${padding.top + chartH - 4}" text-anchor="end" style="font-size:11px;fill:${SH.grey600};">Low</text>
+    <text x="20" y="${padding.top + chartH/2}" text-anchor="middle" transform="rotate(-90, 20, ${padding.top + chartH/2})" style="font-size:14px;fill:${SH.black};font-weight:700;">Benefit</text>
+
+    ${bubbles}
+    ${tooltip}
+  </svg>`;
+}
+
+function renderSectionLegend() {
+  return `<div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;padding:10px 12px;background:${SH.grey50};border:1px solid ${SH.grey300};">
+    ${SECTIONS.map(s => {
+      const count = recommendations.filter(r => r.section === s.key).length;
+      if (count === 0) return '';
+      return `<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:${SH.grey900};">
+        <span style="width:12px;height:12px;border-radius:50%;background:${SECTION_COLORS[s.key]};display:inline-block;"></span>
+        ${esc(s.label)} <span style="color:${SH.grey600};">(${count})</span>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function renderList() {
+  const grouped = SECTIONS.map(s => ({
+    section: s,
+    recs: recommendations.filter(r => r.section === s.key),
+  })).filter(g => g.recs.length > 0);
+
+  const groups = grouped.map(({ section, recs }) => {
+    const items = recs.map(rec => {
+      const key = `${rec.section}-${rec.numberInSection}`;
+      const isHovered = state.hoveredKey === key;
+      return `<div class="rec-item" data-action="hover" data-key="${key}" style="background:${isHovered?hexToRgba(SECTION_COLORS[section.key],0.08):'transparent'};">
+        <div class="rec-num" style="background:${SECTION_COLORS[section.key]};">${rec.numberInSection}</div>
+        <div style="flex:1;font-size:12px;color:${SH.grey900};line-height:1.4;">
+          <div style="font-weight:600;color:${SH.black};">${esc(rec.title)}</div>
+          <div style="font-size:11px;color:${SH.grey600};margin-top:2px;">Current score: ${rec.currentScore.toFixed(1)} · Benefit ${rec.benefit.toFixed(1)} / Effort ${rec.effort}</div>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid ${SECTION_COLORS[section.key]};">
+        <span style="display:inline-block;width:10px;height:10px;background:${SECTION_COLORS[section.key]};"></span>
+        <span style="font-size:13px;font-weight:700;color:${SH.black};">${esc(section.label)}</span>
+        <span style="font-size:11px;color:${SH.grey600};">(${recs.length} recommendation${recs.length!==1?'s':''})</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;">${items}</div>
+    </div>`;
+  }).join('');
+
+  return `<div style="display:flex;flex-direction:column;gap:18px;">${groups}</div>`;
+}
+
+function renderModal() {
+  if (!state.selectedKey) return '';
+  const rec = recommendations.find(r => `${r.section}-${r.numberInSection}` === state.selectedKey);
+  if (!rec) return '';
+  const sectionLabel = SECTIONS.find(s => s.key === rec.section)?.label || '';
+  const subLabel = SUB_LABELS[rec.trigger] || '';
+  const details = IMPLEMENTATION_DETAILS[rec.trigger] || {};
+  const color = SECTION_COLORS[rec.section];
+
+  const tiles = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px;">
+    <div style="padding:12px 14px;background:${SH.grey50};border-top:3px solid ${SH.grey900};">
+      <div style="font-size:10px;color:${SH.grey600};font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Current score</div>
+      <div style="font-size:26px;font-weight:700;color:${SH.black};margin-top:4px;line-height:1;">${rec.currentScore.toFixed(1)} <span style="font-size:14px;color:${SH.grey600};font-weight:400;">/ 5</span></div>
+      <div style="font-size:11px;color:${SH.grey600};margin-top:4px;">${rec.currentScore<2.0?'Critical gap':rec.currentScore<2.5?'Significant weakness':rec.currentScore<3.0?'Below baseline':'Approaching baseline'}</div>
+    </div>
+    <div style="padding:12px 14px;background:${hexToRgba(color,0.08)};border-top:3px solid ${color};">
+      <div style="font-size:10px;color:${SH.grey600};font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Expected benefit</div>
+      <div style="font-size:26px;font-weight:700;color:${color};margin-top:4px;line-height:1;">${rec.benefit.toFixed(1)} <span style="font-size:14px;color:${SH.grey600};font-weight:400;">/ 3</span></div>
+      <div style="font-size:11px;color:${SH.grey600};margin-top:4px;">${rec.benefit>=2.5?'High impact':rec.benefit>=1.8?'Medium impact':'Foundational'}</div>
+    </div>
+    <div style="padding:12px 14px;background:${SH.grey50};border-top:3px solid ${SH.grey900};">
+      <div style="font-size:10px;color:${SH.grey600};font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Implementation effort</div>
+      <div style="font-size:26px;font-weight:700;color:${SH.grey900};margin-top:4px;line-height:1;">${rec.effort} <span style="font-size:14px;color:${SH.grey600};font-weight:400;">/ 3</span></div>
+      <div style="font-size:11px;color:${SH.grey600};margin-top:4px;">${rec.effort===1?'Low — quick to deploy':rec.effort===2?'Medium — moderate change':'High — structural change'}</div>
+    </div>
+  </div>`;
+
+  const stepsHtml = (details.steps || []).map((step, idx) => `<div style="display:flex;align-items:flex-start;gap:12px;">
+    <div style="width:22px;height:22px;border-radius:50%;background:${hexToRgba(color,0.15)};color:${color};font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">${idx+1}</div>
+    <div style="font-size:13px;color:${SH.grey900};line-height:1.5;flex:1;">${esc(step)}</div>
+  </div>`).join('');
+
+  const metaTiles = [
+    { label: 'Key deliverables', value: details.deliverables },
+    { label: 'Suggested owner', value: details.owner },
+    { label: 'Indicative timeline', value: details.timeline },
+    { label: 'KPIs to track', value: details.kpis },
+  ].filter(t => t.value).map(t => `<div style="padding:12px 14px;background:${SH.grey50};border:1px solid ${SH.grey300};">
+    <div style="font-size:10px;color:${SH.grey600};font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">${esc(t.label)}</div>
+    <div style="font-size:12px;color:${SH.black};line-height:1.5;">${esc(t.value)}</div>
+  </div>`).join('');
+
+  return `<div class="modal-overlay" data-action="closeModal">
+    <div class="modal-box" data-stop="1">
+      <div style="background:${color};color:${SH.white};padding:20px 28px;display:flex;align-items:center;gap:16px;">
+        <div style="width:44px;height:44px;border-radius:50%;background:${SH.white};color:${color};font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${rec.numberInSection}</div>
+        <div style="flex:1;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;opacity:0.9;">${esc(sectionLabel)} · ${esc(subLabel)}</div>
+          <div style="font-size:20px;font-weight:700;margin-top:4px;line-height:1.25;">${esc(rec.title)}</div>
+        </div>
+        <button data-action="closeModal" aria-label="Close" style="background:rgba(255,255,255,0.18);border:none;color:${SH.white};font-size:22px;width:32px;height:32px;cursor:pointer;border-radius:50%;line-height:1;flex-shrink:0;">×</button>
+      </div>
+      <div style="padding:24px 28px;">
+        ${tiles}
+        <div style="margin-bottom:22px;">
+          <div style="font-size:11px;color:${SH.grey600};font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Recommendation</div>
+          <div style="font-size:14px;color:${SH.black};line-height:1.55;">${esc(rec.description)}</div>
+        </div>
+        ${details.rationale?`<div style="margin-bottom:22px;">
+          <div style="font-size:11px;color:${SH.grey600};font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Why this matters</div>
+          <div style="font-size:13px;color:${SH.grey900};line-height:1.55;padding:10px 14px;background:${SH.grey50};border-left:3px solid ${color};">${esc(details.rationale)}</div>
+        </div>`:''}
+        ${stepsHtml?`<div style="margin-bottom:22px;">
+          <div style="font-size:11px;color:${SH.grey600};font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">How to implement</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">${stepsHtml}</div>
+        </div>`:''}
+        ${metaTiles?`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:16px;">${metaTiles}</div>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function render() {
+  const body = recommendations.length === 0
+    ? `<div style="padding:40px;text-align:center;background:${SH.grey50};border:1px solid ${SH.grey300};font-size:14px;color:${SH.grey600};">No recommendations triggered — all assessed sub-dimensions score above 3.5.</div>`
+    : `<div class="layout-grid" style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:24px;align-items:start;">
+        <div>
+          <div style="background:${SH.white};border:1px solid ${SH.grey300};padding:16px;margin-bottom:16px;display:flex;justify-content:center;">
+            ${renderMatrix()}
+          </div>
+          ${renderSectionLegend()}
+        </div>
+        <div class="sidebar" style="background:${SH.white};border:1px solid ${SH.grey300};padding:16px 18px;max-height:75vh;overflow-y:auto;">
+          <div style="font-size:14px;font-weight:700;color:${SH.black};margin-bottom:14px;">All recommendations</div>
+          ${renderList()}
+        </div>
+      </div>`;
+
+  document.getElementById('app').innerHTML = `
+    <div style="min-height:100vh;background:${SH.white};color:${SH.black};font-family:${FONT_BODY};padding:32px 40px;">
+      ${renderHeader()}
+      ${renderContextBanner()}
+      ${body}
+      <div style="margin-top:40px;padding-top:16px;border-top:1px solid ${SH.grey300};font-size:12px;color:${SH.grey600};display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;">
+        <div>Portfolio Maturity Assessment | Corporate Innovators</div>
+        <div>Restricted © Siemens Healthineers</div>
+      </div>
+      ${renderModal()}
+    </div>
+  `;
+}
+
+/* =================================
+   EVENT HANDLING
+   ================================= */
+document.addEventListener('click', e => {
+  const target = e.target.closest('[data-action]');
+  if (!target) return;
+  const action = target.dataset.action;
+
+  if (action === 'closeModal') {
+    // If we clicked inside modal-box (data-stop) but not on the close button, ignore
+    if (e.target.closest('[data-stop]') && target.tagName !== 'BUTTON') return;
+    state.selectedKey = null;
+    render();
+    return;
+  }
+
+  if (action === 'hover') {
+    // Click opens detail modal
+    state.selectedKey = target.dataset.key;
+    render();
+  }
+});
+
+document.addEventListener('mouseover', e => {
+  const target = e.target.closest('[data-action="hover"]');
+  if (!target) return;
+  const key = target.dataset.key;
+  if (state.hoveredKey === key) return;
+  state.hoveredKey = key;
+  render();
+});
+
+document.addEventListener('mouseout', e => {
+  const from = e.target.closest('[data-action="hover"]');
+  if (!from) return;
+  const to = e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('[data-action="hover"]');
+  if (to) return;  // moving between hoverable elements is handled by mouseover
+  state.hoveredKey = null;
+  render();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && state.selectedKey) {
+    state.selectedKey = null;
+    render();
+  }
+});
+
+render();
+</script>
+</body>
+</html>

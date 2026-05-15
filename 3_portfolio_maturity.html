@@ -1,0 +1,1036 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portfolio Management Maturity — Assessment Results</title>
+<link href="https://fonts.googleapis.com/css2?family=Bree+Serif&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #ffffff; color: #000000; font-family: 'Calibri','Segoe UI',sans-serif; }
+  button { font-family: inherit; }
+  select { font-family: inherit; }
+  @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+  .modal-overlay { animation: fadeIn 0.2s; }
+  table { border-collapse: collapse; width: 100%; }
+  .scroll-x { overflow-x: auto; }
+  .accordion { border: 1px solid #BFBFBF; margin-bottom: 14px; background: #fff; overflow: hidden; }
+  .accordion-head { padding: 14px 18px; cursor: pointer; user-select: none; display: flex; align-items: center; justify-content: space-between; transition: background 0.2s; }
+  .accordion-body { padding: 24px 18px 22px 18px; }
+  .acc-title { font-size: 16px; font-weight: 700; color: #000; }
+  .acc-sub { font-size: 12px; color: #808080; margin-top: 2px; }
+  .acc-arrow { font-size: 14px; font-weight: 700; transition: transform 0.2s; }
+  .acc-arrow.open { transform: rotate(180deg); }
+  .tile { padding: 14px 16px; background: #F5F5F5; border: 1px solid #E5E5E5; }
+  .tile-label { font-size: 10px; color: #808080; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
+  .tile-value { font-size: 32px; font-weight: 700; color: #000; line-height: 1.1; margin-top: 4px; }
+  .tile-sub { font-size: 11px; color: #808080; margin-top: 2px; }
+  .grid-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-bottom: 18px; }
+  .narrative { padding: 14px 18px; background: #fff; border: 1px solid #BFBFBF; margin-bottom: 18px; font-size: 13px; color: #404040; line-height: 1.6; }
+  .narrative-label { font-size: 10px; color: #808080; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 6px; }
+  .section-title { font-size: 13px; font-weight: 700; color: #000; margin-bottom: 8px; }
+  .scope-btn { padding: 10px 22px; background: #fff; color: #000; cursor: pointer; font-size: 13px; font-weight: 400; }
+  .scope-btn.active { background: #EC6602; color: #fff; font-weight: 700; }
+  .filter-drop { display: flex; flex-direction: column; gap: 2px; }
+  .filter-drop label { font-size: 10px; color: #808080; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .filter-drop select { padding: 6px 8px; border: 1px solid #BFBFBF; background: #fff; font-size: 12px; min-width: 120px; cursor: pointer; }
+  .filter-drop.active select { border-left: 3px solid #EC6602; color: #000; font-weight: 600; }
+  .filter-drop.inactive select { color: #808080; font-weight: 400; }
+  .heat-cell { padding: 6px 3px; text-align: center; font-size: 13px; font-weight: 700; border-bottom: 1px solid #fff; border-left: 1px solid #fff; }
+  .heat-cell.sub { font-size: 11px; }
+  .tab-btn { padding: 10px 18px; border: none; margin-bottom: -2px; background: transparent; color: #808080; cursor: pointer; font-size: 13px; font-weight: 400; border-bottom: 3px solid transparent; }
+  .tab-btn.active { color: #EC6602; font-weight: 700; border-bottom: 3px solid #EC6602; }
+  .legend-item { padding: 6px 6px; text-align: center; flex: 1; }
+  .legend-label { font-size: 11px; font-weight: 700; }
+  .legend-range { font-size: 9px; opacity: 0.85; }
+  .pulse-card { padding: 14px 16px; border-left: 4px solid; position: relative; cursor: pointer; transition: all 0.2s; display: flex; gap: 12px; align-items: flex-start; }
+  .pulse-card:hover { transform: translateY(-2px); }
+  .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.55); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .modal-box { background: #fff; max-width: 720px; width: 100%; max-height: 90vh; overflow-y: auto; border-left: 6px solid; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  .archetype-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .info-pill { font-size: 11px; color: #009999; font-weight: 600; margin-top: 8px; }
+  .badge-current { position: absolute; top: 8px; right: 10px; font-size: 9px; font-weight: 700; color: #fff; padding: 2px 6px; letter-spacing: 0.05em; }
+  th, td { vertical-align: middle; }
+  .demo-bar-wrap { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+  .demo-bar-name { width: 120px; color: #404040; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .demo-bar-track { flex: 1; height: 14px; background: #E5E5E5; position: relative; }
+  .demo-bar-fill { height: 100%; transition: width 0.4s; }
+  .demo-bar-count { width: 32px; text-align: right; font-weight: 700; color: #000; }
+  .demo-bar-pct { width: 38px; text-align: right; color: #808080; font-size: 10px; }
+  .grid-demo { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* =========================================================================
+   PORTFOLIO MANAGEMENT MATURITY — vanilla JS port of original React/TSX
+   ========================================================================= */
+
+const SH = { black:"#000000", orange:"#EC6602", petrol:"#009999", grey900:"#404040", grey600:"#808080", grey300:"#BFBFBF", grey100:"#E5E5E5", grey50:"#F5F5F5", white:"#FFFFFF" };
+const BG = "#B7B7B7";
+const BG2 = "#87D2D2";
+const FONT_H = "'Bree Serif','Calibri',sans-serif";
+const FONT = "'Calibri','Segoe UI',sans-serif";
+
+const hex2rgba = (h,a) => { const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16); return `rgba(${r},${g},${b},${a})`; };
+const seed = s => { let h=0; for(let i=0;i<s.length;i++) h=((h<<5)-h+s.charCodeAt(i))|0; return h; };
+const sr = (s,i) => { const x=Math.sin(seed(s)+i*9301+49297)*49297; return x-Math.floor(x); };
+const clamp = (v,lo=1,hi=5) => Math.max(lo,Math.min(hi,v));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+
+const DIMS = [
+  { key:"AWR",label:"Awareness",desc:"Does the org know what good looks like?" },
+  { key:"DEF",label:"Definition",desc:"Are structures and processes defined?" },
+  { key:"ADO",label:"Adoption",desc:"Are defined structures used in practice?" },
+  { key:"MEA",label:"Measurement",desc:"Can you see what's happening?" },
+  { key:"GOV",label:"Governance",desc:"Are decisions enforced?" },
+  { key:"LRN",label:"Learning",desc:"Does the system improve itself?" },
+];
+const SECTS = [
+  { key:"S1",label:"Leadership & Organization",subs:[{key:"S1.1",label:"Leadership understanding"},{key:"S1.2",label:"Evidence-based leadership"},{key:"S1.3",label:"Leadership discipline"},{key:"S1.4",label:"Organizational setup"},{key:"S1.5",label:"Targets & incentives"}]},
+  { key:"S2",label:"Strategic Inputs",subs:[{key:"S2.1",label:"Scenarios & outlook"},{key:"S2.2",label:"Market sizing"},{key:"S2.3",label:"External intelligence"},{key:"S2.4",label:"Local market intelligence"},{key:"S2.5",label:"Strategy translation"},{key:"S2.6",label:"Investment logic"}]},
+  { key:"S3",label:"Portfolio Core",subs:[{key:"S3.1",label:"Portfolio architecture"},{key:"S3.2",label:"Customer value"},{key:"S3.3",label:"Intake management"},{key:"S3.4",label:"Evaluation & validation"},{key:"S3.5",label:"Prioritization rigor"},{key:"S3.6",label:"Capacity & WIP"},{key:"S3.7",label:"Overall assessment"},{key:"S3.8",label:"Portfolio phase out"}]},
+  { key:"S4",label:"Execution & Performance",subs:[{key:"S4.1",label:"Portfolio execution"},{key:"S4.2",label:"Portfolio roll-out"},{key:"S4.3",label:"Performance & benefits"}]},
+  { key:"S5",label:"Governance & Roles",subs:[{key:"S5.1",label:"Process design"},{key:"S5.2",label:"Roles & rights"},{key:"S5.3",label:"Meeting cadence"},{key:"S5.4",label:"Escalation"},{key:"S5.5",label:"Tools & data"},{key:"S5.6",label:"Funding model"},{key:"S5.7",label:"Financial transparency"}]},
+  { key:"S6",label:"Culture & Mindset",subs:[{key:"S6.1",label:"Org understanding"},{key:"S6.2",label:"Org adaptability"},{key:"S6.3",label:"Cultural openness"},{key:"S6.4",label:"Learning"},{key:"S6.5",label:"Skills"}]},
+];
+
+const ROLES = ["All","BU Leadership","Strategy","Portfolio Mgmt","Product Mgmt","Program/Project Mgmt","R&D Leadership","R&D Team","Finance","Sales","Other"];
+const SENIORITIES = ["All","C-Level","VP/Director","Manager","IC"];
+const LOCATIONS = ["All","Global HQ","Regional HQ","Local Office","Remote"];
+const EXPERIENCE = ["All","<1yr","1-5yr","5-10yr",">10yr"];
+const SCOPES = [
+  { key:"company",label:"Whole Company" },
+  { key:"bu",label:"Business Unit" },
+  { key:"project",label:"Project" },
+  { key:"process",label:"Process" },
+];
+
+const ARCHETYPES = [
+  { name:"The Unaware",color:SH.grey600,desc:"No shared understanding. System not conceived.",fix:"Education → ambition → basics",test:p=>p._avg<2 },
+  { name:"The Architect",color:SH.orange,desc:"Great blueprints nobody follows.",fix:"Diagnose why → align leadership → simplify",test:p=>p.DEF>3.2&&p.ADO<2.8 },
+  { name:"The Blind Executor",color:"#C07020",desc:"Disciplined but flying blind.",fix:"Dashboards → track decision quality",test:p=>p.ADO>3&&p.MEA<2.5 },
+  { name:"The Toothless Tiger",color:"#D04040",desc:"Voluntary compliance — breaks under pressure.",fix:"Incentives → funding discipline → consequences",test:p=>p.DEF>3&&p.ADO>3&&p.GOV<2.8 },
+  { name:"The Static Machine",color:SH.grey900,desc:"Works today, won't survive disruption.",fix:"Retrospectives → close BC loop → adapt",test:p=>p._avg>3.2&&p.LRN<2.5 },
+  { name:"The Adaptive Portfolio",color:SH.petrol,desc:"Top quartile — optimize & extend.",fix:"Analytics → benchmark → extend to M&A",test:p=>p._avg>3.5 },
+  { name:"In Transition",color:SH.grey900,desc:"Mixed — fix the binding constraint.",fix:"Focus weakest dimension",test:()=>true },
+];
+const getArch = p => ARCHETYPES.find(a=>a.test(p));
+const matLabel = v => v>=4?"Adaptive":v>=3.5?"Managed":v>=3?"Developing":v>=2.5?"Emerging":"Ad-hoc";
+const getBg = v => v>=4?SH.petrol:v>=3.5?hex2rgba(SH.petrol,0.6):v>=3?hex2rgba(SH.orange,0.3):v>=2.5?hex2rgba(SH.orange,0.6):SH.orange;
+const getFg = v => v>=4||v<2.5?SH.white:SH.black;
+const getGapBg = g => {
+  if(g>=1) return SH.petrol;
+  if(g>=0.5) return hex2rgba(SH.petrol,0.6);
+  if(g>=0.1) return hex2rgba(SH.petrol,0.3);
+  if(g>-0.1) return SH.grey100;
+  if(g>-0.5) return hex2rgba(SH.orange,0.3);
+  if(g>-1) return hex2rgba(SH.orange,0.6);
+  return SH.orange;
+};
+const getGapFg = g => (Math.abs(g)>=1)?SH.white:SH.black;
+
+const genProfile = (id,base,v=0.8) => {
+  const p={};let ix=0;
+  DIMS.forEach(d=>{p[d.key]=clamp(base+(sr(id,ix++)-0.5)*v*2.4);});
+  SECTS.forEach(s=>{
+    p[s.key]=clamp(base+(sr(id,ix++)-0.5)*v*2);
+    s.subs.forEach(sub=>{p[sub.key]=clamp(p[s.key]+(sr(id,ix++)-0.5)*1.4);});
+  });
+  p.matrix={};
+  SECTS.forEach(s=>{
+    p.matrix[s.key]={};DIMS.forEach(d=>{p.matrix[s.key][d.key]=clamp((p[d.key]*0.6+p[s.key]*0.4)+(sr(id,ix++)-0.5)*1.2);});
+    s.subs.forEach(sub=>{p.matrix[sub.key]={};DIMS.forEach(d=>{p.matrix[sub.key][d.key]=clamp((p[d.key]*0.5+p[sub.key]*0.5)+(sr(id,ix++)-0.5)*1.3);});});
+  });
+  p._avg=DIMS.reduce((s,d)=>s+p[d.key],0)/DIMS.length;
+  p._n=Math.floor(sr(id,ix++)*25)+12;
+  p._roles={
+    "BU Leadership":Math.floor(sr(id,ix++)*4)+1,
+    "Strategy":Math.floor(sr(id,ix++)*3)+1,
+    "Portfolio Mgmt":Math.floor(sr(id,ix++)*4)+2,
+    "Product Mgmt":Math.floor(sr(id,ix++)*5)+2,
+    "Program/Project Mgmt":Math.floor(sr(id,ix++)*4)+1,
+    "R&D Leadership":Math.floor(sr(id,ix++)*3)+1,
+    "R&D Team":Math.floor(sr(id,ix++)*6)+2,
+    "Finance":Math.floor(sr(id,ix++)*3)+1,
+    "Sales":Math.floor(sr(id,ix++)*3)+1,
+    "Other":Math.floor(sr(id,ix++)*2),
+  };
+  p._seniority={"C-Level":Math.floor(sr(id,ix++)*3)+1,"VP/Director":Math.floor(sr(id,ix++)*5)+2,"Manager":Math.floor(sr(id,ix++)*7)+3,"IC":Math.floor(sr(id,ix++)*8)+2};
+  p._experience={"<1yr":Math.floor(sr(id,ix++)*3)+1,"1-5yr":Math.floor(sr(id,ix++)*6)+3,"5-10yr":Math.floor(sr(id,ix++)*5)+2,">10yr":Math.floor(sr(id,ix++)*4)+1};
+  p._location={"Global HQ":Math.floor(sr(id,ix++)*10)+4,"Regional HQ":Math.floor(sr(id,ix++)*6)+2,"Local Office":Math.floor(sr(id,ix++)*4)+1,"Remote":Math.floor(sr(id,ix++)*3)+1};
+  p._version={Full:Math.floor(p._n*0.55),Light:Math.ceil(p._n*0.45)};
+  p._satisfaction=Math.round((base*1.6+(sr(id,ix++)-0.5)*2)*10)/10;
+  p._satisfaction=Math.max(1,Math.min(9.5,p._satisfaction));
+  p._leaderView={};p._teamView={};
+  DIMS.forEach(d=>{p._leaderView[d.key]=clamp(p[d.key]+0.4+(sr(id,ix++)-0.5)*0.6);p._teamView[d.key]=clamp(p[d.key]-0.5+(sr(id,ix++)-0.5)*0.6);});
+  return p;
+};
+
+const buildScope = (scope) => {
+  const ownSeed = `own-${scope}`;
+  const baseMap = {company:2.9,bu:3.0,project:3.2,process:2.7};
+  const own = {id:"own",name:scope==="company"?"Your Organization":scope==="bu"?"Your Business Unit":scope==="project"?"Your Project":"Your Process",profile:genProfile(ownSeed,baseMap[scope],0.7),color:SH.orange};
+  const med = {id:"med",name:"Industry Median",profile:genProfile(`med-${scope}`,3.1,0.3),color:BG};
+  const bic = {id:"bic",name:"Best-in-Class",profile:genProfile(`bic-${scope}`,4.2,0.4),color:BG2};
+  return {label:scope==="company"?"Whole Company Assessment":scope==="bu"?"Business Unit Assessment":scope==="project"?"Project Assessment":"Process Assessment",items:[own,med,bic]};
+};
+
+/* =================================
+   ARCHETYPE DETAILS (with SVG vis)
+   ================================= */
+const ARCHETYPE_DETAILS = {
+  "The Unaware": {
+    profile: "The organization hasn't yet developed a shared understanding of what portfolio management should look like. Processes are informal, ad-hoc, and vary by team.",
+    cSuiteHears: "We're at the starting line. The good news is we know what the path looks like.",
+    actions: [
+      "Executive enablement — build shared mental model of portfolio management among top 30 leaders",
+      "Define the ambition — where does the organization want to be in 18 months?",
+      "Start with the basics — intake process, standardized opportunity descriptions, regular review cadence",
+    ],
+    horizon: "12–18 months to foundational maturity",
+    bindingConstraint: "Awareness — nothing else will work until people understand the system. Start with enablement.",
+    visual: (c) => `<svg viewBox="0 0 120 80" style="width:100%;max-width:120px">
+      <circle cx="20" cy="20" r="6" fill="${c}" opacity="0.4"/>
+      <circle cx="55" cy="15" r="5" fill="${c}" opacity="0.3"/>
+      <circle cx="95" cy="25" r="7" fill="${c}" opacity="0.5"/>
+      <circle cx="30" cy="50" r="5" fill="${c}" opacity="0.35"/>
+      <circle cx="70" cy="55" r="6" fill="${c}" opacity="0.45"/>
+      <circle cx="100" cy="60" r="4" fill="${c}" opacity="0.3"/>
+    </svg>`,
+  },
+  "The Architect": {
+    profile: "The organization has invested heavily in designing portfolio processes, frameworks, and tools. But the designed system isn't being used consistently. People have workarounds. Shadow processes exist.",
+    cSuiteHears: "We've built the machine. Now we need to start it.",
+    actions: [
+      "Diagnose why adoption is low — is the process too heavy? Too slow? Not trusted? Not understood?",
+      "Leadership alignment — visible, personal commitment from the top 10 leaders to follow the process",
+      "Simplify where possible — if the process is too complex for adoption, it's the wrong process",
+      "Quick wins — identify 2–3 high-visibility decisions where the process demonstrably adds value",
+    ],
+    horizon: "6–12 months — the infrastructure exists; the gap is behavioral",
+    bindingConstraint: "Adoption — the process needs to earn trust. Start with leadership alignment and simplification.",
+    visual: (c) => {
+      let rects = '';
+      for (let r=0;r<3;r++) for (let col=0;col<4;col++) rects += `<rect x="${10+col*28}" y="${10+r*22}" width="22" height="16" fill="none" stroke="${c}" stroke-width="1.5" opacity="0.7"/>`;
+      return `<svg viewBox="0 0 120 80" style="width:100%;max-width:120px">${rects}
+        <line x1="15" y1="34" x2="32" y2="50" stroke="${c}" stroke-width="1.5" opacity="0.5"/>
+        <line x1="32" y1="34" x2="15" y2="50" stroke="${c}" stroke-width="1.5" opacity="0.5"/>
+        <line x1="71" y1="12" x2="88" y2="28" stroke="${c}" stroke-width="1.5" opacity="0.5"/>
+        <line x1="88" y1="12" x2="71" y2="28" stroke="${c}" stroke-width="1.5" opacity="0.5"/>
+      </svg>`;
+    },
+  },
+  "The Blind Executor": {
+    profile: "People follow the process. Governance exists. But the organization can't see whether the process is producing good outcomes. Decisions feel right but aren't validated by data.",
+    cSuiteHears: "We're disciplined but flying blind. We might be doing the right things — or we might be efficiently executing the wrong strategy.",
+    actions: [
+      "Instrument the portfolio — business case tracking, predicted vs. actual, pipeline flow metrics",
+      "Build dashboards — not as an IT project but as a governance enablement initiative",
+      "Start tracking decision quality — were last year's portfolio decisions right?",
+      "Introduce cost-of-delay estimation for top 20 portfolio elements",
+    ],
+    horizon: "6–9 months for basic instrumentation; 12–18 months for full integration",
+    bindingConstraint: "Measurement — you can't manage what you can't see. Start with data infrastructure.",
+    visual: (c) => {
+      let teeth = '';
+      [0,60,120,180,240,300].forEach(a=>{
+        const x1 = 40 + Math.cos(a*Math.PI/180)*18;
+        const y1 = 40 + Math.sin(a*Math.PI/180)*18;
+        const x2 = 40 + Math.cos(a*Math.PI/180)*23;
+        const y2 = 40 + Math.sin(a*Math.PI/180)*23;
+        teeth += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="3"/>`;
+      });
+      return `<svg viewBox="0 0 120 80" style="width:100%;max-width:120px">
+        <circle cx="40" cy="40" r="18" fill="none" stroke="${c}" stroke-width="2"/>
+        <circle cx="40" cy="40" r="3" fill="${c}"/>
+        ${teeth}
+        <circle cx="85" cy="40" r="12" fill="none" stroke="${c}" stroke-width="2" opacity="0.6"/>
+        <circle cx="85" cy="40" r="2" fill="${c}" opacity="0.6"/>
+        <rect x="20" y="15" width="80" height="6" fill="${c}" opacity="0.25"/>
+      </svg>`;
+    },
+  },
+  "The Toothless Tiger": {
+    profile: "The system is well-designed and people follow it — voluntarily. But there are no consequences for non-compliance, shadow budgets exist, and political pressure can override portfolio decisions. The system works only as long as everyone chooses to cooperate.",
+    cSuiteHears: "Our system collapses under pressure. The next budget cut or strategic pivot will reveal that compliance is voluntary.",
+    actions: [
+      "Incentive realignment — introduce portfolio-level KPIs into performance management for key roles",
+      "Enforce funding discipline — audit for shadow budgets; require governance approval for all reallocations",
+      "Strengthen the governance body — ensure it has mandate, authority, and C-suite backing",
+      "Make one visible enforcement decision — demonstrate that the system has consequences",
+    ],
+    horizon: "3–6 months for structural changes; 12 months for cultural shift",
+    bindingConstraint: "Governance — the system needs teeth. Start with incentive alignment and decision rights.",
+    visual: (c) => `<svg viewBox="0 0 120 80" style="width:100%;max-width:120px">
+      <ellipse cx="60" cy="40" rx="32" ry="26" fill="none" stroke="${c}" stroke-width="2"/>
+      <path d="M 35 22 L 30 10 L 45 18 Z" fill="${c}" opacity="0.4"/>
+      <path d="M 85 22 L 90 10 L 75 18 Z" fill="${c}" opacity="0.4"/>
+      <line x1="48" y1="34" x2="55" y2="34" stroke="${c}" stroke-width="2"/>
+      <line x1="65" y1="34" x2="72" y2="34" stroke="${c}" stroke-width="2"/>
+      <ellipse cx="60" cy="52" rx="10" ry="6" fill="none" stroke="${c}" stroke-width="2"/>
+      <line x1="25" y1="48" x2="42" y2="48" stroke="${c}" stroke-width="1" opacity="0.6"/>
+      <line x1="95" y1="48" x2="78" y2="48" stroke="${c}" stroke-width="1" opacity="0.6"/>
+    </svg>`,
+  },
+  "The Static Machine": {
+    profile: "The portfolio system is mature — well-designed, adopted, visible, and enforced. But it runs the same playbook regardless of outcomes. Business case misses aren't analyzed. Process improvements don't happen. The system was built for yesterday's reality.",
+    cSuiteHears: "Our system works today. But it won't survive the next major market shift because it doesn't learn.",
+    actions: [
+      "Institute systematic retrospectives — quarterly 'what did we get right/wrong?' portfolio reviews",
+      "Close the business case loop — track every major business case against actuals at 12 and 24 months",
+      "Build scenario-based adaptation — link portfolio decisions to scenarios with pre-defined rebalancing triggers",
+      "Invest in skill development — ensure the portfolio management function grows with the system",
+    ],
+    horizon: "6–12 months to establish learning loops; ongoing for continuous improvement",
+    bindingConstraint: "Learning — the system needs to evolve. Start with feedback loops and retrospectives.",
+    visual: (c) => `<svg viewBox="0 0 120 80" style="width:100%;max-width:120px">
+      <rect x="30" y="20" width="60" height="40" fill="none" stroke="${c}" stroke-width="2"/>
+      <rect x="40" y="30" width="40" height="20" fill="${c}" opacity="0.2"/>
+      <circle cx="45" cy="35" r="4" fill="none" stroke="${c}" stroke-width="1.5"/>
+      <circle cx="60" cy="35" r="4" fill="none" stroke="${c}" stroke-width="1.5"/>
+      <circle cx="75" cy="35" r="4" fill="none" stroke="${c}" stroke-width="1.5"/>
+      <circle cx="45" cy="48" r="3" fill="${c}" opacity="0.5"/>
+      <circle cx="60" cy="48" r="3" fill="${c}" opacity="0.5"/>
+      <circle cx="75" cy="48" r="3" fill="${c}" opacity="0.5"/>
+      <rect x="55" y="65" width="10" height="8" fill="none" stroke="${c}" stroke-width="1.5"/>
+      <path d="M 57 65 L 57 62 Q 60 60 63 62 L 63 65" fill="none" stroke="${c}" stroke-width="1.5"/>
+    </svg>`,
+  },
+  "The Adaptive Portfolio": {
+    profile: "Rare. The organization has a well-designed system that is understood, adopted, visible, enforced, and continuously improving. The focus shifts from building the system to optimizing it.",
+    cSuiteHears: "We're in the top quartile. The question now is how to extend our advantage.",
+    actions: [
+      "Advanced portfolio analytics — predictive models, automated early warning signals, AI-assisted scenario generation",
+      "External benchmarking — compare portfolio performance metrics against industry leaders",
+      "Extend portfolio thinking — apply portfolio discipline to M&A pipeline, partnership strategy, and talent investment",
+      "Become a teaching organization — codify what works and build internal portfolio management academy",
+    ],
+    horizon: "Continuous optimization",
+    bindingConstraint: "No single binding constraint. Focus on extending advantage and continuous learning.",
+    visual: (c) => `<svg viewBox="0 0 120 80" style="width:100%;max-width:120px">
+      <circle cx="60" cy="40" r="26" fill="none" stroke="${c}" stroke-width="2"/>
+      <circle cx="60" cy="40" r="18" fill="none" stroke="${c}" stroke-width="1.5" opacity="0.6"/>
+      <circle cx="60" cy="40" r="10" fill="${c}" opacity="0.25"/>
+      <path d="M 86 40 A 26 26 0 0 1 60 66" fill="none" stroke="${c}" stroke-width="2"/>
+      <polygon points="60,66 64,62 64,70" fill="${c}"/>
+      <path d="M 34 40 A 26 26 0 0 1 60 14" fill="none" stroke="${c}" stroke-width="2"/>
+      <polygon points="60,14 56,18 56,10" fill="${c}"/>
+      <circle cx="60" cy="40" r="3" fill="${c}"/>
+    </svg>`,
+  },
+  "In Transition": {
+    profile: "Mixed signals across dimensions. The organization is moving but the binding constraint isn't yet clear.",
+    cSuiteHears: "We're partway there. The question is which constraint to attack first.",
+    actions: [
+      "Identify the binding constraint — the dimension dragging the system down",
+      "Sequence interventions — don't try to fix everything at once",
+      "Align leadership around the priority",
+    ],
+    horizon: "6–12 months once binding constraint is identified",
+    bindingConstraint: "Identify and fix the weakest dimension.",
+    visual: (c) => `<svg viewBox="0 0 120 80" style="width:100%;max-width:120px">
+      <rect x="20" y="35" width="80" height="10" fill="${c}" opacity="0.25"/>
+      <polygon points="100,40 88,32 88,48" fill="${c}"/>
+    </svg>`,
+  },
+};
+
+/* =================================
+   STATE
+   ================================= */
+const state = {
+  scope: 'company',
+  filters: {role:'All', seniority:'All', location:'All', experience:'All'},
+  openSections: {summary:true, details:false, demographics:false, archetypes:false},
+  detailView: 'heatmap_scores',
+  radarShowMed: true,
+  radarShowBic: true,
+  heatmapMode: 'absolute',
+  modalArch: null,
+  heatExpanded: {}, // {S1:true,...}
+};
+
+// localStorage persistence for user filter/sort preferences
+try {
+  const saved = localStorage.getItem('pmm_state');
+  if (saved) {
+    const p = JSON.parse(saved);
+    Object.assign(state.openSections, p.openSections || {});
+    if (p.scope) state.scope = p.scope;
+    if (p.detailView) state.detailView = p.detailView;
+    if (p.heatmapMode) state.heatmapMode = p.heatmapMode;
+    if (p.radarShowMed !== undefined) state.radarShowMed = p.radarShowMed;
+    if (p.radarShowBic !== undefined) state.radarShowBic = p.radarShowBic;
+    if (p.filters) state.filters = p.filters;
+  }
+} catch(e){}
+function persist() {
+  try {
+    localStorage.setItem('pmm_state', JSON.stringify({
+      openSections: state.openSections,
+      scope: state.scope,
+      detailView: state.detailView,
+      heatmapMode: state.heatmapMode,
+      radarShowMed: state.radarShowMed,
+      radarShowBic: state.radarShowBic,
+      filters: state.filters,
+    }));
+  } catch(e){}
+}
+
+/* =================================
+   RENDERERS — return HTML strings
+   ================================= */
+
+function renderHeader() {
+  return `
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid ${SH.grey300};flex-wrap:wrap;gap:16px;">
+    <div>
+      <h1 style="font-size:25px;font-family:${FONT_H};font-weight:700;color:${SH.orange};margin:0;line-height:1.1;">Portfolio Management Maturity</h1>
+      <h2 style="font-size:25px;font-family:${FONT_H};font-weight:700;color:${SH.black};margin:2px 0 0;line-height:1.1;">Assessment Results</h2>
+    </div>
+    <div style="text-align:right;line-height:1;">
+      <div style="font-family:${FONT};font-size:17px;font-weight:700;color:${SH.petrol};letter-spacing:0.8px;">SIEMENS</div>
+      <div style="font-family:${FONT_H};font-size:19px;font-weight:700;color:${SH.orange};margin-top:3px;">Healthineers</div>
+    </div>
+  </div>`;
+}
+
+function renderScopeTabs() {
+  const btns = SCOPES.map((s,i)=>{
+    const active = state.scope===s.key;
+    const bt = active ? SH.orange : SH.grey300;
+    const isLast = i===SCOPES.length-1;
+    return `<button class="scope-btn ${active?'active':''}" data-action="setScope" data-scope="${s.key}" style="border-top:1px solid ${bt};border-bottom:1px solid ${bt};border-left:1px solid ${bt};border-right:${isLast?`1px solid ${bt}`:'none'};">${esc(s.label)}</button>`;
+  }).join('');
+  return `<div style="margin-bottom:18px;">
+    <div class="section-title">Assessment Scope</div>
+    <div style="display:flex;gap:0;flex-wrap:wrap;">${btns}</div>
+  </div>`;
+}
+
+function renderContextBar(data, own) {
+  return `<div style="font-size:13px;margin-bottom:18px;padding:10px 14px;background:${SH.grey50};border-left:4px solid ${SH.orange};">
+    <strong>${esc(data.label)}</strong> — ${own.profile._n} responses, benchmarked against industry median and best-in-class
+  </div>`;
+}
+
+function renderAccordion(key, title, subtitle, accent, body) {
+  const open = state.openSections[key];
+  return `<div class="accordion" style="border-left:4px solid ${accent};">
+    <div class="accordion-head" data-action="toggleSection" data-key="${key}" style="background:${open?hex2rgba(accent,0.04):SH.white};border-bottom:${open?`1px solid ${SH.grey100}`:'none'};">
+      <div>
+        <div class="acc-title">${esc(title)}</div>
+        ${subtitle?`<div class="acc-sub">${esc(subtitle)}</div>`:''}
+      </div>
+      <div class="acc-arrow ${open?'open':''}" style="color:${accent};">▼</div>
+    </div>
+    ${open?`<div class="accordion-body">${body}</div>`:''}
+  </div>`;
+}
+
+function renderExecutiveSummary(own, med, bic) {
+  const arch = getArch(own.profile);
+  const sectionResults = SECTS.map(s=>({
+    key:s.key, label:s.label,
+    score:own.profile[s.key],
+    gapMed:own.profile[s.key]-med.profile[s.key],
+    gapBic:own.profile[s.key]-bic.profile[s.key],
+  }));
+  const allSubs = SECTS.flatMap(s=>s.subs.map(sub=>({
+    key:sub.key,label:sub.label,section:s.label,
+    score:own.profile[sub.key],
+    gap:own.profile[sub.key]-med.profile[sub.key],
+  })));
+  const sorted = [...allSubs].sort((a,b)=>b.gap-a.gap);
+  const top3 = sorted.slice(0,3);
+  const bot3 = sorted.slice(-3).reverse();
+  const overallGap = own.profile._avg - med.profile._avg;
+  const strongestSection = sectionResults.reduce((m,s)=>s.score>m.score?s:m,sectionResults[0]);
+  const weakestSection = sectionResults.reduce((m,s)=>s.score<m.score?s:m,sectionResults[0]);
+  const narrative = `Overall portfolio management maturity scored ${own.profile._avg.toFixed(1)} on a 5-point scale — ${matLabel(own.profile._avg).toLowerCase()} level, ${Math.abs(overallGap)<0.1?"on par with":overallGap>=0?`${overallGap.toFixed(1)} above`:`${Math.abs(overallGap).toFixed(1)} below`} the industry median (${med.profile._avg.toFixed(1)}) and ${(bic.profile._avg-own.profile._avg).toFixed(1)} points behind best-in-class performers (${bic.profile._avg.toFixed(1)}). The organization profile matches "${arch.name}" — ${arch.desc.toLowerCase()} The strongest section is ${strongestSection.label} (${strongestSection.score.toFixed(1)}), while the binding constraint sits in ${weakestSection.label} (${weakestSection.score.toFixed(1)}). Priority action: ${arch.fix.toLowerCase()}.`;
+
+  const rows = sectionResults.map(s=>`<tr>
+    <td style="padding:8px 10px;font-size:12px;color:${SH.black};font-weight:600;border-bottom:1px solid ${SH.grey100};">${esc(s.label)}</td>
+    <td style="padding:6px 10px;text-align:center;font-size:13px;font-weight:700;color:${getFg(s.score)};background:${getBg(s.score)};border-bottom:1px solid ${SH.white};">${s.score.toFixed(1)}</td>
+    <td style="padding:8px 10px;text-align:center;font-size:12px;color:${SH.grey600};border-bottom:1px solid ${SH.grey100};">${med.profile[s.key].toFixed(1)}</td>
+    <td style="padding:8px 10px;text-align:center;font-size:12px;font-weight:700;color:${s.gapMed>=0?SH.petrol:SH.orange};border-bottom:1px solid ${SH.grey100};">${s.gapMed>=0?'+':''}${s.gapMed.toFixed(1)}</td>
+    <td style="padding:8px 10px;text-align:center;font-size:12px;color:${SH.grey600};border-bottom:1px solid ${SH.grey100};">${bic.profile[s.key].toFixed(1)}</td>
+    <td style="padding:8px 10px;text-align:center;font-size:12px;font-weight:700;color:${s.gapBic>=0?SH.petrol:SH.orange};border-bottom:1px solid ${SH.grey100};">${s.gapBic>=0?'+':''}${s.gapBic.toFixed(1)}</td>
+  </tr>`).join('');
+
+  const top3Html = top3.map((t,i)=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+    <div style="width:22px;height:22px;border-radius:50%;background:${SH.petrol};color:${SH.white};font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</div>
+    <div style="flex:1;"><div style="font-size:12px;font-weight:700;color:${SH.black};">${esc(t.label)}</div><div style="font-size:10px;color:${SH.grey600};">${esc(t.section)} · Score ${t.score.toFixed(1)}</div></div>
+    <div style="font-size:15px;font-weight:700;color:${SH.petrol};">+${t.gap.toFixed(1)}</div>
+  </div>`).join('');
+
+  const bot3Html = bot3.map((t,i)=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+    <div style="width:22px;height:22px;border-radius:50%;background:${SH.orange};color:${SH.white};font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</div>
+    <div style="flex:1;"><div style="font-size:12px;font-weight:700;color:${SH.black};">${esc(t.label)}</div><div style="font-size:10px;color:${SH.grey600};">${esc(t.section)} · Score ${t.score.toFixed(1)}</div></div>
+    <div style="font-size:15px;font-weight:700;color:${SH.orange};">${t.gap.toFixed(1)}</div>
+  </div>`).join('');
+
+  return `<div>
+    <div class="grid-tiles">
+      <div class="tile">
+        <div class="tile-label">Overall Score</div>
+        <div class="tile-value">${own.profile._avg.toFixed(1)}<span style="font-size:14px;color:${SH.grey600};">/5</span></div>
+        <div class="tile-sub">${matLabel(own.profile._avg)}</div>
+      </div>
+      <div class="tile">
+        <div class="tile-label">Gap to Median</div>
+        <div class="tile-value" style="color:${overallGap>=0?SH.petrol:SH.orange};">${overallGap>=0?'+':''}${overallGap.toFixed(1)}</div>
+        <div class="tile-sub">vs. ${med.profile._avg.toFixed(1)} median</div>
+      </div>
+      <div class="tile">
+        <div class="tile-label">Gap to Best</div>
+        <div class="tile-value" style="color:${SH.orange};">${(own.profile._avg-bic.profile._avg).toFixed(1)}</div>
+        <div class="tile-sub">vs. ${bic.profile._avg.toFixed(1)} best-in-class</div>
+      </div>
+      <div class="tile">
+        <div class="tile-label">Responses</div>
+        <div class="tile-value">${own.profile._n}</div>
+        <div class="tile-sub">${own.profile._version.Full} full · ${own.profile._version.Light} light</div>
+      </div>
+      <div class="tile" style="background:${hex2rgba(arch.color,0.08)};border:1px solid ${hex2rgba(arch.color,0.25)};border-left:4px solid ${arch.color};">
+        <div class="tile-label" style="color:${arch.color};">Archetype</div>
+        <div style="font-size:16px;font-weight:700;color:${arch.color};line-height:1.2;margin-top:4px;">${esc(arch.name)}</div>
+        <div style="font-size:11px;color:${SH.grey900};margin-top:3px;line-height:1.3;">${esc(arch.desc)}</div>
+      </div>
+    </div>
+
+    <div class="narrative">
+      <div class="narrative-label">Summary</div>
+      ${esc(narrative)}
+    </div>
+
+    <div style="margin-bottom:18px;">
+      <div class="section-title">Results by Section</div>
+      <div class="scroll-x">
+        <table style="min-width:540px;">
+          <thead><tr>
+            <th style="padding:8px 10px;font-size:11px;color:${SH.grey900};text-align:left;font-weight:700;border-bottom:2px solid ${SH.black};">Section</th>
+            <th style="padding:8px 10px;font-size:11px;color:${SH.black};text-align:center;font-weight:700;border-bottom:2px solid ${SH.black};min-width:80px;">Score</th>
+            <th style="padding:8px 10px;font-size:11px;color:${SH.grey600};text-align:center;font-weight:700;border-bottom:2px solid ${SH.black};min-width:90px;">Median</th>
+            <th style="padding:8px 10px;font-size:11px;color:${SH.grey600};text-align:center;font-weight:700;border-bottom:2px solid ${SH.black};min-width:90px;">Gap Med.</th>
+            <th style="padding:8px 10px;font-size:11px;color:${SH.grey600};text-align:center;font-weight:700;border-bottom:2px solid ${SH.black};min-width:90px;">Best</th>
+            <th style="padding:8px 10px;font-size:11px;color:${SH.grey600};text-align:center;font-weight:700;border-bottom:2px solid ${SH.black};min-width:90px;">Gap Best</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:14px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:280px;padding:14px 18px;background:${hex2rgba(SH.petrol,0.05)};border:1px solid ${hex2rgba(SH.petrol,0.25)};border-left:4px solid ${SH.petrol};">
+        <div style="font-size:11px;font-weight:700;color:${SH.petrol};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Where You Lead (vs. Median)</div>
+        ${top3Html}
+      </div>
+      <div style="flex:1;min-width:280px;padding:14px 18px;background:${hex2rgba(SH.orange,0.05)};border:1px solid ${hex2rgba(SH.orange,0.25)};border-left:4px solid ${SH.orange};">
+        <div style="font-size:11px;font-weight:700;color:${SH.orange};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Where You Trail (vs. Median)</div>
+        ${bot3Html}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderFilterBar() {
+  const drops = [
+    {label:'Role', value:state.filters.role, opts:ROLES, fk:'role'},
+    {label:'Seniority', value:state.filters.seniority, opts:SENIORITIES, fk:'seniority'},
+    {label:'Location', value:state.filters.location, opts:LOCATIONS, fk:'location'},
+    {label:'Experience', value:state.filters.experience, opts:EXPERIENCE, fk:'experience'},
+  ].map(d=>{
+    const active = d.value!=='All';
+    return `<div class="filter-drop ${active?'active':'inactive'}">
+      <label>${esc(d.label)}</label>
+      <select data-action="setFilter" data-fk="${d.fk}">
+        ${d.opts.map(o=>`<option value="${esc(o)}" ${o===d.value?'selected':''}>${esc(o)}</option>`).join('')}
+      </select>
+    </div>`;
+  }).join('');
+  const active = Object.values(state.filters).filter(v=>v!=='All').length;
+  return `<div>
+    <div style="font-size:12px;font-weight:700;color:${SH.black};margin-bottom:8px;display:flex;align-items:center;gap:10px;">
+      Respondent Filters
+      ${active>0?`<button data-action="resetFilters" style="font-size:11px;color:${SH.orange};background:none;border:none;cursor:pointer;font-weight:600;text-decoration:underline;">Reset (${active})</button>`:''}
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">${drops}</div>
+    ${active>0?`<div style="margin-top:8px;font-size:11px;color:${SH.petrol};font-weight:600;">ⓘ Filtered view — scores may differ from unfiltered aggregate</div>`:''}
+  </div>`;
+}
+
+function renderHeatMap(item, mode, benchmark) {
+  const getValue = (rowKey,dimKey) => {
+    const v = item.profile.matrix[rowKey]?.[dimKey];
+    if(v===undefined) return undefined;
+    if(mode==='absolute') return v;
+    if(mode==='gap_med') return v - (benchmark.median.matrix[rowKey]?.[dimKey] || 0);
+    if(mode==='gap_bic') return v - (benchmark.best.matrix[rowKey]?.[dimKey] || 0);
+    return v;
+  };
+  const fmtCell = v => mode==='absolute'?v.toFixed(1):`${v>=0?'+':''}${v.toFixed(1)}`;
+  const cellBg = v => mode==='absolute'?getBg(v):getGapBg(v);
+  const cellFg = v => mode==='absolute'?getFg(v):getGapFg(v);
+
+  const buildRow = (k,label,indent,isSub,hasSubs,isExp) => {
+    const vals = DIMS.map(d=>getValue(k,d.key)).filter(v=>v!==undefined);
+    const avg = vals.length ? vals.reduce((s,v)=>s+v,0)/vals.length : 0;
+    const cells = DIMS.map(d=>{
+      const v=getValue(k,d.key);
+      if (v===undefined) return `<td style="text-align:center;border-bottom:1px solid ${SH.grey100};color:${SH.grey300};font-size:11px;">—</td>`;
+      const title = mode==='absolute'?`${matLabel(v)} (${v.toFixed(2)})`:`Gap: ${v>=0?'+':''}${v.toFixed(2)}`;
+      return `<td title="${esc(title)}" class="heat-cell ${isSub?'sub':''}" style="color:${cellFg(v)};background:${cellBg(v)};">${fmtCell(v)}</td>`;
+    }).join('');
+    const arrow = hasSubs?`<span style="display:inline-block;width:14px;color:${SH.orange};font-size:9px;margin-right:3px;transform:${isExp?'rotate(90deg)':'rotate(0deg)'};transition:transform 0.2s;">▶</span>`:'';
+    const spacer = isSub?`<span style="display:inline-block;width:14px;margin-right:3px;"></span>`:'';
+    const labelCell = `<td ${hasSubs?`data-action="toggleHeat" data-key="${k}"`:''} style="padding:7px 8px 7px ${8+indent}px;font-size:${isSub?11:12}px;color:${isSub?SH.grey600:SH.black};font-weight:${isSub?400:700};border-bottom:1px solid ${SH.grey100};cursor:${hasSubs?'pointer':'default'};user-select:none;white-space:nowrap;">${arrow}${spacer}${esc(label)}</td>`;
+    const avgCell = `<td style="padding:6px;text-align:center;font-size:${isSub?10:12}px;font-weight:700;color:${SH.grey600};border-bottom:1px solid ${SH.grey100};background:${SH.grey50};">${fmtCell(avg)}</td>`;
+    return `<tr>${labelCell}${cells}${avgCell}</tr>`;
+  };
+
+  const rows = SECTS.flatMap(s=>{
+    const isExp = !!state.heatExpanded[s.key];
+    const sectionRow = buildRow(s.key, s.label, 0, false, true, isExp);
+    const subRows = isExp ? s.subs.map(sub => buildRow(sub.key, sub.label, 20, true, false, false)) : [];
+    return [sectionRow, ...subRows];
+  }).join('');
+
+  const expandedCount = Object.values(state.heatExpanded).filter(Boolean).length;
+  const allExpanded = expandedCount === SECTS.length;
+
+  let legend = '';
+  if (mode==='absolute') {
+    const levels = [
+      {l:'Ad-hoc',r:'<2.5',bg:SH.orange,fg:SH.white},
+      {l:'Emerging',r:'2.5–3.0',bg:hex2rgba(SH.orange,0.6),fg:SH.black},
+      {l:'Developing',r:'3.0–3.5',bg:hex2rgba(SH.orange,0.3),fg:SH.black},
+      {l:'Managed',r:'3.5–4.0',bg:hex2rgba(SH.petrol,0.6),fg:SH.white},
+      {l:'Adaptive',r:'≥4.0',bg:SH.petrol,fg:SH.white},
+    ];
+    legend = `<div style="margin-top:14px;padding:10px 14px;background:${SH.grey50};border:1px solid ${SH.grey100};">
+      <div style="font-size:11px;font-weight:700;color:${SH.grey900};margin-bottom:6px;">Maturity Levels</div>
+      <div style="display:flex;gap:0;">${levels.map(lv=>`<div class="legend-item" style="background:${lv.bg};color:${lv.fg};"><div class="legend-label">${esc(lv.l)}</div><div class="legend-range">${esc(lv.r)}</div></div>`).join('')}</div>
+    </div>`;
+  } else {
+    const levels = [
+      {l:'Far behind',r:'≤ -1.0',bg:SH.orange,fg:SH.white},
+      {l:'Behind',r:'-1.0 to -0.5',bg:hex2rgba(SH.orange,0.6),fg:SH.black},
+      {l:'Slightly behind',r:'-0.5 to -0.1',bg:hex2rgba(SH.orange,0.3),fg:SH.black},
+      {l:'On par',r:'-0.1 to +0.1',bg:SH.grey100,fg:SH.black},
+      {l:'Slightly ahead',r:'+0.1 to +0.5',bg:hex2rgba(SH.petrol,0.3),fg:SH.black},
+      {l:'Ahead',r:'+0.5 to +1.0',bg:hex2rgba(SH.petrol,0.6),fg:SH.white},
+      {l:'Far ahead',r:'≥ +1.0',bg:SH.petrol,fg:SH.white},
+    ];
+    legend = `<div style="margin-top:14px;padding:10px 14px;background:${SH.grey50};border:1px solid ${SH.grey100};">
+      <div style="font-size:11px;font-weight:700;color:${SH.grey900};margin-bottom:6px;">Gap Scale</div>
+      <div style="display:flex;gap:0;">${levels.map(lv=>`<div class="legend-item" style="background:${lv.bg};color:${lv.fg};"><div class="legend-label" style="font-size:10px;">${esc(lv.l)}</div><div class="legend-range">${esc(lv.r)}</div></div>`).join('')}</div>
+    </div>`;
+  }
+
+  const caption = mode==='absolute'?'Maturity scores (1.0 – 5.0) — click sections to drill':
+                   mode==='gap_med'?'Gap to industry median — positive (petrol) = ahead, negative (orange) = behind':
+                   'Gap to best-in-class — positive (petrol) = ahead, negative (orange) = behind';
+
+  return `<div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+      <div style="font-size:13px;color:${SH.grey600};">${esc(caption)}</div>
+      <button data-action="toggleHeatAll" style="padding:5px 12px;border:1px solid ${SH.orange};background:${SH.white};color:${SH.orange};cursor:pointer;font-size:11px;font-weight:700;">${allExpanded?'Collapse all':'Expand all'}</button>
+    </div>
+    <div class="scroll-x">
+      <table style="min-width:560px;">
+        <thead><tr>
+          <th style="padding:8px;font-size:11px;color:${SH.grey900};text-align:left;font-weight:700;border-bottom:2px solid ${SH.black};min-width:170px;">Section</th>
+          ${DIMS.map(d=>`<th style="padding:8px 4px;font-size:11px;color:${SH.black};text-align:center;font-weight:700;border-bottom:2px solid ${SH.black};white-space:nowrap;">${esc(d.label)}</th>`).join('')}
+          <th style="padding:8px 4px;font-size:10px;color:${SH.grey600};text-align:center;font-weight:700;border-bottom:2px solid ${SH.black};">Avg</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    ${legend}
+  </div>`;
+}
+
+function renderSectionRadar(own, med, bic) {
+  const size = 420;
+  const cx = size/2, r = size/2 - 90, step = (2*Math.PI)/SECTS.length;
+  const pt = (i,v) => { const a=step*i-Math.PI/2, d=(v/5)*r; return {x:cx+d*Math.cos(a),y:cx+d*Math.sin(a)}; };
+  const path = prof => SECTS.map((s,i)=>{const p=pt(i,prof[s.key]);return `${i?'L':'M'} ${p.x} ${p.y}`;}).join(' ')+'Z';
+
+  const layers = [];
+  if (state.radarShowBic) layers.push({item:bic,isPri:false});
+  if (state.radarShowMed) layers.push({item:med,isPri:false});
+  layers.push({item:own,isPri:true});
+
+  const wrapLabel = (label,maxChars=18) => {
+    if (label.length <= maxChars) return [label];
+    const words = label.split(' ');
+    const lines = []; let current = '';
+    words.forEach(w=>{
+      if ((current+' '+w).trim().length <= maxChars) current = (current+' '+w).trim();
+      else { if(current) lines.push(current); current = w; }
+    });
+    if (current) lines.push(current);
+    return lines;
+  };
+
+  const gridPolys = [1,2,3,4,5].map(l=>{
+    const pts = SECTS.map((_,i)=>{const p=pt(i,l);return `${p.x},${p.y}`;}).join(' ');
+    return `<polygon points="${pts}" fill="none" stroke="${l===3?SH.grey600:SH.grey300}" stroke-width="${l===3?1:0.5}" stroke-dasharray="${l===3?'4,3':'none'}"/>`;
+  }).join('');
+
+  const axesLabels = SECTS.map((s,i)=>{
+    const p=pt(i,5), lp=pt(i,5.55);
+    const lines = wrapLabel(s.label);
+    const texts = lines.map((ln,j)=>`<text x="${lp.x}" y="${lp.y + (j - (lines.length-1)/2)*13}" text-anchor="middle" dominant-baseline="middle" style="font-size:11.5px;fill:${SH.black};font-weight:700;">${esc(ln)}</text>`).join('');
+    return `<g><line x1="${cx}" y1="${cx}" x2="${p.x}" y2="${p.y}" stroke="${SH.grey300}" stroke-width="0.5"/>${texts}</g>`;
+  }).join('');
+
+  const scaleLabels = [1,2,3,4,5].map(l=>{const p=pt(0,l);return `<text x="${p.x+8}" y="${p.y-4}" style="font-size:9px;fill:${SH.grey600};">${l}</text>`;}).join('');
+
+  const layerSvg = layers.map(({item,isPri})=>{
+    const dots = SECTS.map((s,i)=>{const p=pt(i,item.profile[s.key]);return `<circle cx="${p.x}" cy="${p.y}" r="${isPri?4.5:3}" fill="${item.color}" stroke="${SH.white}" stroke-width="1.5"/>`;}).join('');
+    return `<g><path d="${path(item.profile)}" fill="${hex2rgba(item.color,isPri?0.14:0.06)}" stroke="${item.color}" stroke-width="${isPri?2.5:1.5}" stroke-dasharray="${isPri?'none':'6,3'}"/>${dots}</g>`;
+  }).join('');
+
+  const legends = [
+    `<div style="display:flex;align-items:center;gap:5px;font-size:12px;color:${SH.grey900};"><div style="width:12px;height:12px;background:${SH.orange};border-radius:2px;"></div>${esc(own.name)}</div>`,
+    state.radarShowMed?`<div style="display:flex;align-items:center;gap:5px;font-size:12px;color:${SH.grey900};"><div style="width:12px;height:12px;background:${BG};border-radius:2px;"></div>Industry Median</div>`:'',
+    state.radarShowBic?`<div style="display:flex;align-items:center;gap:5px;font-size:12px;color:${SH.grey900};"><div style="width:12px;height:12px;background:${BG2};border-radius:2px;"></div>Best-in-Class</div>`:''
+  ].filter(Boolean).join('');
+
+  return `<div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:10px;">
+      <div style="font-size:15px;font-weight:700;color:${SH.black};">Section Radar</div>
+      <div style="display:flex;gap:14px;align-items:center;">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;">
+          <input type="checkbox" ${state.radarShowMed?'checked':''} data-action="setRadar" data-which="med" style="accent-color:${BG};">
+          <span style="color:${SH.grey900};"><span style="display:inline-block;width:10px;height:2px;background:${BG};margin-right:4px;vertical-align:middle;"></span>Industry Median</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;">
+          <input type="checkbox" ${state.radarShowBic?'checked':''} data-action="setRadar" data-which="bic" style="accent-color:${BG2};">
+          <span style="color:${SH.grey900};"><span style="display:inline-block;width:10px;height:2px;background:${BG2};margin-right:4px;vertical-align:middle;"></span>Best-in-Class</span>
+        </label>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:center;">
+      <svg viewBox="0 0 ${size} ${size}" style="width:100%;max-width:${size}px;">
+        ${gridPolys}
+        ${axesLabels}
+        ${scaleLabels}
+        ${layerSvg}
+      </svg>
+    </div>
+    <div style="display:flex;gap:14px;justify-content:center;margin-top:10px;flex-wrap:wrap;">${legends}</div>
+  </div>`;
+}
+
+function renderPerspectiveGap(profile) {
+  const rows = DIMS.map(d=>{
+    const lv = profile._leaderView[d.key], tv = profile._teamView[d.key];
+    const gap = Math.abs(lv-tv);
+    const sig = gap>1.0;
+    return `<div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div style="font-size:12px;font-weight:700;color:${SH.black};">${esc(d.label)}</div>
+        <div style="font-size:11px;font-weight:700;color:${sig?SH.orange:SH.grey600};">Gap: ${gap.toFixed(1)} ${sig?'⚠':''}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0;">
+        <div style="display:flex;align-items:center;gap:0;">
+          <div style="width:90px;font-size:11px;color:${SH.grey600};text-align:right;padding-right:8px;">Leadership</div>
+          <div style="flex:1;height:14px;background:${SH.grey100};"><div style="width:${(lv/5)*100}%;height:100%;background:${hex2rgba(SH.petrol,0.7)};transition:width 0.5s;"></div></div>
+          <div style="width:28px;font-size:12px;font-weight:700;color:${SH.black};text-align:right;padding-left:6px;">${lv.toFixed(1)}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0;">
+          <div style="width:90px;font-size:11px;color:${SH.grey600};text-align:right;padding-right:8px;">Teams</div>
+          <div style="flex:1;height:14px;background:${SH.grey100};border-top:1px solid ${SH.white};"><div style="width:${(tv/5)*100}%;height:100%;background:${hex2rgba(SH.orange,0.7)};transition:width 0.5s;"></div></div>
+          <div style="width:28px;font-size:12px;font-weight:700;color:${SH.black};text-align:right;padding-left:6px;">${tv.toFixed(1)}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div>
+    <div style="font-size:12px;color:${SH.grey600};margin-bottom:14px;">How leadership perceives the system vs. how teams experience it. Gaps &gt; 1.0 indicate significant misalignment.</div>
+    <div style="display:flex;flex-direction:column;gap:12px;">${rows}</div>
+    <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;font-size:11px;color:${SH.grey600};flex-wrap:wrap;">
+      <span><span style="display:inline-block;width:12px;height:8px;background:${hex2rgba(SH.petrol,0.7)};margin-right:4px;vertical-align:middle;"></span>Leadership view</span>
+      <span><span style="display:inline-block;width:12px;height:8px;background:${hex2rgba(SH.orange,0.7)};margin-right:4px;vertical-align:middle;"></span>Team view</span>
+      <span>⚠ = Gap &gt; 1.0 (significant)</span>
+    </div>
+  </div>`;
+}
+
+function renderDetailBody(own, med, bic) {
+  const tabs = [
+    {key:'heatmap_scores',label:'Heat Map · Scores'},
+    {key:'heatmap_med',label:'Heat Map · Gap to Median'},
+    {key:'heatmap_bic',label:'Heat Map · Gap to Best'},
+    {key:'radar',label:'Section Radar'},
+    {key:'perspective',label:'Perspective Gap'},
+  ];
+  const tabsHtml = tabs.map(v=>`<button class="tab-btn ${state.detailView===v.key?'active':''}" data-action="setDetail" data-view="${v.key}">${esc(v.label)}</button>`).join('');
+
+  let content = '';
+  if (state.detailView==='heatmap_scores') {
+    content = `<div><div style="font-size:15px;font-weight:700;color:${SH.black};margin-bottom:6px;">Heat Map — Your Maturity Scores</div>${renderHeatMap(own,'absolute')}</div>`;
+  } else if (state.detailView==='heatmap_med') {
+    content = `<div><div style="font-size:15px;font-weight:700;color:${SH.black};margin-bottom:6px;">Heat Map — Gap to Industry Median</div>${renderHeatMap(own,'gap_med',{median:med.profile,best:bic.profile})}</div>`;
+  } else if (state.detailView==='heatmap_bic') {
+    content = `<div><div style="font-size:15px;font-weight:700;color:${SH.black};margin-bottom:6px;">Heat Map — Gap to Best-in-Class</div>${renderHeatMap(own,'gap_bic',{median:med.profile,best:bic.profile})}</div>`;
+  } else if (state.detailView==='radar') {
+    content = renderSectionRadar(own, med, bic);
+  } else if (state.detailView==='perspective') {
+    content = `<div><div style="font-size:15px;font-weight:700;color:${SH.black};margin-bottom:6px;">Perspective Gap — Leadership vs. Teams</div>${renderPerspectiveGap(own.profile)}</div>`;
+  }
+
+  return `<div>
+    <div style="margin-bottom:18px;padding:12px 14px;background:${SH.grey50};border:1px solid ${SH.grey100};border-left:3px solid ${SH.petrol};">
+      ${renderFilterBar()}
+    </div>
+    <div style="display:flex;gap:0;border-bottom:2px solid ${SH.grey300};margin-bottom:18px;flex-wrap:wrap;">${tabsHtml}</div>
+    ${content}
+  </div>`;
+}
+
+function renderDemographics(profile) {
+  const breakdown = (title, data, color) => {
+    const total = Object.values(data).reduce((s,v)=>s+v,0);
+    const max = Math.max(...Object.values(data));
+    const rows = Object.entries(data).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).map(([k,v])=>{
+      const pct = (v/total)*100;
+      const barW = (v/max)*100;
+      return `<div class="demo-bar-wrap">
+        <div class="demo-bar-name" title="${esc(k)}">${esc(k)}</div>
+        <div class="demo-bar-track"><div class="demo-bar-fill" style="width:${barW}%;background:${color};"></div></div>
+        <div class="demo-bar-count">${v}</div>
+        <div class="demo-bar-pct">${pct.toFixed(0)}%</div>
+      </div>`;
+    }).join('');
+    return `<div>
+      <div style="font-size:11px;color:${SH.grey900};font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.04em;">${esc(title)}</div>
+      <div style="display:flex;flex-direction:column;gap:5px;">${rows}</div>
+    </div>`;
+  };
+
+  return `<div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:10px;margin-bottom:18px;">
+      <div style="padding:12px 14px;background:${SH.grey50};border:1px solid ${SH.grey100};">
+        <div style="font-size:10px;color:${SH.grey600};text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Total Responses</div>
+        <div style="font-size:26px;font-weight:700;color:${SH.black};margin-top:3px;">${profile._n}</div>
+      </div>
+      <div style="padding:12px 14px;background:${SH.grey50};border:1px solid ${SH.grey100};">
+        <div style="font-size:10px;color:${SH.grey600};text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Full Version</div>
+        <div style="font-size:26px;font-weight:700;color:${SH.petrol};margin-top:3px;">${profile._version.Full}</div>
+        <div style="font-size:10px;color:${SH.grey600};">${((profile._version.Full/profile._n)*100).toFixed(0)}% of total</div>
+      </div>
+      <div style="padding:12px 14px;background:${SH.grey50};border:1px solid ${SH.grey100};">
+        <div style="font-size:10px;color:${SH.grey600};text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Light Version</div>
+        <div style="font-size:26px;font-weight:700;color:${SH.orange};margin-top:3px;">${profile._version.Light}</div>
+        <div style="font-size:10px;color:${SH.grey600};">${((profile._version.Light/profile._n)*100).toFixed(0)}% of total</div>
+      </div>
+      <div style="padding:12px 14px;background:${SH.grey50};border:1px solid ${SH.grey100};">
+        <div style="font-size:10px;color:${SH.grey600};text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Avg. Satisfaction</div>
+        <div style="font-size:26px;font-weight:700;color:${SH.black};margin-top:3px;">${profile._satisfaction.toFixed(1)}<span style="font-size:13px;color:${SH.grey600};">/10</span></div>
+      </div>
+    </div>
+    <div class="grid-demo">
+      ${breakdown('Distribution by Role',profile._roles,SH.orange)}
+      ${breakdown('Distribution by Seniority',profile._seniority,SH.petrol)}
+      ${breakdown('Distribution by Experience',profile._experience,SH.grey900)}
+      ${breakdown('Distribution by Location',profile._location,'#C07020')}
+    </div>
+  </div>`;
+}
+
+function renderArchetypeReference(currentArch) {
+  return `<div class="archetype-grid">${ARCHETYPES.slice(0,6).map(a=>{
+    const isCurrent = a.name === currentArch.name;
+    const detail = ARCHETYPE_DETAILS[a.name];
+    return `<div class="pulse-card" data-action="openArch" data-name="${esc(a.name)}" style="border-left-color:${a.color};background:${isCurrent?hex2rgba(a.color,0.08):SH.grey50};border:${isCurrent?`1px solid ${a.color}`:`1px solid ${SH.grey100}`};">
+      ${isCurrent?`<div class="badge-current" style="background:${a.color};">CURRENT</div>`:''}
+      <div style="width:56px;height:40px;background:${hex2rgba(a.color,0.08)};flex-shrink:0;padding:2px 4px;display:flex;align-items:center;justify-content:center;">
+        ${detail.visual(a.color)}
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:700;color:${a.color};">${esc(a.name)}</div>
+        <div style="font-size:11px;color:${SH.grey900};margin-top:4px;line-height:1.4;">${esc(a.desc)}</div>
+        <div class="info-pill" style="color:${a.color};">Click for details →</div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function renderArchetypeModal() {
+  if (!state.modalArch) return '';
+  const arch = ARCHETYPES.find(a=>a.name===state.modalArch);
+  if (!arch) return '';
+  const detail = ARCHETYPE_DETAILS[arch.name];
+  const actions = detail.actions.map((a,i)=>`<div style="display:flex;gap:10px;align-items:flex-start;">
+    <div style="width:22px;height:22px;border-radius:50%;background:${arch.color};color:${SH.white};font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">${i+1}</div>
+    <div style="font-size:13px;color:${SH.grey900};line-height:1.5;">${esc(a)}</div>
+  </div>`).join('');
+
+  return `<div class="modal-overlay" data-action="closeModal">
+    <div class="modal-box" data-stop="1" style="border-left-color:${arch.color};">
+      <div style="padding:20px 28px;border-bottom:1px solid ${SH.grey100};display:flex;align-items:center;justify-content:space-between;gap:16px;">
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div style="width:72px;height:48px;background:${hex2rgba(arch.color,0.08)};padding:4px 6px;display:flex;align-items:center;justify-content:center;">
+            ${detail.visual(arch.color)}
+          </div>
+          <div>
+            <div style="font-size:10px;color:${SH.grey600};text-transform:uppercase;letter-spacing:0.1em;font-weight:700;">Archetype</div>
+            <div style="font-size:22px;font-weight:700;color:${arch.color};line-height:1.2;margin-top:2px;">${esc(arch.name)}</div>
+          </div>
+        </div>
+        <button data-action="closeModal" style="background:none;border:none;font-size:22px;color:${SH.grey600};cursor:pointer;padding:4px 10px;line-height:1;">×</button>
+      </div>
+      <div style="padding:22px 28px;">
+        <div style="margin-bottom:18px;">
+          <div style="font-size:11px;font-weight:700;color:${SH.grey900};text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Profile</div>
+          <div style="font-size:13px;color:${SH.grey900};line-height:1.6;">${esc(detail.profile)}</div>
+        </div>
+        <div style="margin-bottom:18px;padding:12px 16px;background:${hex2rgba(arch.color,0.06)};border-left:3px solid ${arch.color};">
+          <div style="font-size:11px;font-weight:700;color:${arch.color};text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">What the C-Suite Hears</div>
+          <div style="font-size:14px;color:${SH.black};line-height:1.5;font-style:italic;">"${esc(detail.cSuiteHears)}"</div>
+        </div>
+        <div style="margin-bottom:18px;">
+          <div style="font-size:11px;font-weight:700;color:${SH.grey900};text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Binding Constraint</div>
+          <div style="padding:10px 14px;background:${hex2rgba(SH.orange,0.08)};border-left:3px solid ${SH.orange};font-size:13px;color:${SH.black};line-height:1.5;">${esc(detail.bindingConstraint)}</div>
+        </div>
+        <div style="margin-bottom:18px;">
+          <div style="font-size:11px;font-weight:700;color:${SH.grey900};text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Priority Actions</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">${actions}</div>
+        </div>
+        <div style="padding:12px 16px;background:${SH.grey50};border:1px solid ${SH.grey100};display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <div style="font-size:11px;font-weight:700;color:${SH.grey600};text-transform:uppercase;letter-spacing:0.06em;">Investment Horizon</div>
+          <div style="font-size:13px;color:${SH.black};font-weight:600;">${esc(detail.horizon)}</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function render() {
+  const data = buildScope(state.scope);
+  const own = data.items[0], med = data.items[1], bic = data.items[2];
+  const currentArch = getArch(own.profile);
+
+  const summary = renderExecutiveSummary(own, med, bic);
+  const details = renderDetailBody(own, med, bic);
+  const demographics = renderDemographics(own.profile);
+  const archetypes = renderArchetypeReference(currentArch);
+
+  const html = `
+    <div style="min-height:100vh;background:${SH.white};color:${SH.black};font-family:${FONT};padding:28px 36px;">
+      ${renderHeader()}
+      ${renderScopeTabs()}
+      ${renderContextBar(data, own)}
+      ${renderAccordion('summary','Executive Summary','Overall score, key results, top strengths and weaknesses', SH.orange, summary)}
+      ${renderAccordion('details','Result Details','Heat maps, section radar and perspective gap', SH.petrol, details)}
+      ${renderAccordion('demographics','Response Demographics', `${own.profile._n} respondents — breakdown by role, seniority, experience, location`, SH.grey900, demographics)}
+      ${renderAccordion('archetypes','Archetype Reference','Six maturity archetypes — click any card for full diagnostic detail', currentArch.color, archetypes)}
+      ${renderArchetypeModal()}
+      <div style="margin-top:36px;padding-top:14px;border-top:1px solid ${SH.grey300};font-size:11px;color:${SH.grey600};display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <div>Portfolio Maturity Assessment | Corporate Innovators</div>
+        <div>Restricted © Siemens Healthineers</div>
+      </div>
+    </div>
+  `;
+  document.getElementById('app').innerHTML = html;
+}
+
+/* =================================
+   EVENT DELEGATION
+   ================================= */
+document.addEventListener('click', e => {
+  // Modal: clicks inside modal-box should not close
+  const stop = e.target.closest('[data-stop]');
+  const target = e.target.closest('[data-action]');
+  if (!target) return;
+  const action = target.dataset.action;
+
+  // Don't close modal when clicking inside box, but allow close button
+  if (action === 'closeModal') {
+    if (e.target.closest('[data-stop]') && e.target.tagName !== 'BUTTON') return;
+    state.modalArch = null;
+    render();
+    return;
+  }
+
+  if (action === 'setScope') {
+    state.scope = target.dataset.scope;
+    state.detailView = 'heatmap_scores';
+    state.heatExpanded = {};
+    persist();
+    render();
+  } else if (action === 'toggleSection') {
+    const k = target.dataset.key;
+    state.openSections[k] = !state.openSections[k];
+    persist();
+    render();
+  } else if (action === 'setDetail') {
+    const v = target.dataset.view;
+    state.detailView = v;
+    if (v === 'heatmap_scores') state.heatmapMode = 'absolute';
+    if (v === 'heatmap_med') state.heatmapMode = 'gap_med';
+    if (v === 'heatmap_bic') state.heatmapMode = 'gap_bic';
+    persist();
+    render();
+  } else if (action === 'toggleHeat') {
+    const k = target.dataset.key;
+    state.heatExpanded[k] = !state.heatExpanded[k];
+    render();
+  } else if (action === 'toggleHeatAll') {
+    const expandedCount = Object.values(state.heatExpanded).filter(Boolean).length;
+    if (expandedCount === SECTS.length) {
+      state.heatExpanded = {};
+    } else {
+      state.heatExpanded = {};
+      SECTS.forEach(s => state.heatExpanded[s.key] = true);
+    }
+    render();
+  } else if (action === 'resetFilters') {
+    state.filters = {role:'All',seniority:'All',location:'All',experience:'All'};
+    persist();
+    render();
+  } else if (action === 'openArch') {
+    state.modalArch = target.dataset.name;
+    render();
+  }
+});
+
+document.addEventListener('change', e => {
+  const target = e.target.closest('[data-action]');
+  if (!target) return;
+  const action = target.dataset.action;
+  if (action === 'setFilter') {
+    const fk = target.dataset.fk;
+    state.filters[fk] = target.value;
+    persist();
+    render();
+  } else if (action === 'setRadar') {
+    const which = target.dataset.which;
+    if (which === 'med') state.radarShowMed = target.checked;
+    if (which === 'bic') state.radarShowBic = target.checked;
+    persist();
+    render();
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && state.modalArch) {
+    state.modalArch = null;
+    render();
+  }
+});
+
+render();
+</script>
+</body>
+</html>
