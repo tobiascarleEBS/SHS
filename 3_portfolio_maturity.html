@@ -1040,128 +1040,172 @@ render();
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   <script>
-function buildSurveyPayload() {
-  function extractResponseValue(response) {
-    if (!response) return null;
+<script>
+  function buildSurveyPayload() {
+    function extractResponseValue(response) {
+      if (!response) return null;
 
-    if (typeof response.valueIndex === "number") {
-      if (response.value && String(response.value).toLowerCase().includes("don't know")) {
-        return null;
+      if (typeof response.valueIndex === "number") {
+        if (response.value && String(response.value).toLowerCase().includes("don't know")) {
+          return null;
+        }
+        return response.valueIndex + 1;
       }
-      return response.valueIndex + 1;
+
+      if (typeof response.value === "number") {
+        return response.value;
+      }
+
+      if (typeof response.value === "string" && response.value.trim() !== "") {
+        return response.value.trim();
+      }
+
+      if (response.valueText && String(response.valueText).trim() !== "") {
+        return String(response.valueText).trim();
+      }
+
+      return null;
     }
 
-    if (typeof response.value === "number") {
-      return response.value;
-    }
+    const payload = {
+      submission_id: crypto.randomUUID(),
+      submitted_at: new Date().toISOString(),
+      survey_name: "Portfolio Management Maturity Assessment",
+      survey_version: "light_v1",
+      source: "web",
 
-    if (typeof response.value === "string" && response.value.trim() !== "") {
-      return response.value.trim();
-    }
+      respondent_role: extractResponseValue(state.responses["role"]),
+      years_experience_portfolio_management: extractResponseValue(state.responses["experience"]),
+      assessment_scope: extractResponseValue(state.responses["what_for"]),
+      assessment_object_name: extractResponseValue(state.responses["object_name"]),
+      overall_satisfaction: extractResponseValue(state.responses["satisfaction"]),
+      what_works_well: extractResponseValue(state.responses["what_works"]),
+      current_blockers: extractResponseValue(state.responses["what_blocks"]),
 
-    if (response.valueText && String(response.valueText).trim() !== "") {
-      return String(response.valueText).trim();
-    }
+      q_1_1_1: extractResponseValue(state.responses["1.1.1"]),
+      q_1_1_3: extractResponseValue(state.responses["1.1.3"]),
+      q_1_2_2: extractResponseValue(state.responses["1.2.2"]),
+      q_1_3_1: extractResponseValue(state.responses["1.3.1"]),
+      q_1_4_1: extractResponseValue(state.responses["1.4.1"]),
+      q_1_5_1: extractResponseValue(state.responses["1.5.1"]),
 
-    return null;
+      q_2_1_1: extractResponseValue(state.responses["2.1.1"]),
+      q_2_2_1: extractResponseValue(state.responses["2.2.1"]),
+      q_2_3_1: extractResponseValue(state.responses["2.3.1"]),
+      q_2_4_1: extractResponseValue(state.responses["2.4.1"]),
+      q_2_5_2: extractResponseValue(state.responses["2.5.2"]),
+      q_2_6_1: extractResponseValue(state.responses["2.6.1"]),
+
+      q_3_1_1: extractResponseValue(state.responses["3.1.1"]),
+      q_3_2_3: extractResponseValue(state.responses["3.2.3"]),
+      q_3_3_1: extractResponseValue(state.responses["3.3.1"]),
+      q_3_3_2: extractResponseValue(state.responses["3.3.2"]),
+      q_3_4_2: extractResponseValue(state.responses["3.4.2"]),
+      q_3_5_1: extractResponseValue(state.responses["3.5.1"]),
+      q_3_6_2: extractResponseValue(state.responses["3.6.2"]),
+      q_3_7_2: extractResponseValue(state.responses["3.7.2"]),
+      q_3_8_2: extractResponseValue(state.responses["3.8.2"]),
+
+      q_4_1_1: extractResponseValue(state.responses["4.1.1"]),
+      q_4_1_2: extractResponseValue(state.responses["4.1.2"]),
+      q_4_2_1: extractResponseValue(state.responses["4.2.1"]),
+      q_4_3_2: extractResponseValue(state.responses["4.3.2"]),
+
+      q_5_1_1: extractResponseValue(state.responses["5.1.1"]),
+      q_5_2_1: extractResponseValue(state.responses["5.2.1"]),
+      q_5_3_2: extractResponseValue(state.responses["5.3.2"]),
+      q_5_4_2: extractResponseValue(state.responses["5.4.2"]),
+      q_5_5_3: extractResponseValue(state.responses["5.5.3"]),
+      q_5_6_1: extractResponseValue(state.responses["5.6.1"]),
+      q_5_7_3: extractResponseValue(state.responses["5.7.3"]),
+
+      q_6_1_1: extractResponseValue(state.responses["6.1.1"]),
+      q_6_2_1: extractResponseValue(state.responses["6.2.1"]),
+      q_6_3_2: extractResponseValue(state.responses["6.3.2"]),
+      q_6_4_1: extractResponseValue(state.responses["6.4.1"]),
+      q_6_5_1: extractResponseValue(state.responses["6.5.1"]),
+
+      perceived_competitive_maturity: extractResponseValue(state.responses["perceived"]),
+      additional_comments: extractResponseValue(state.responses["anything_else"])
+    };
+
+    return payload;
   }
-
-  const payload = {
-    submission_id: crypto.randomUUID(),
-    submitted_at: new Date().toISOString(),
-    survey_name: "Portfolio Management Maturity Assessment",
-    survey_version: "light_v1",
-    source: "web",
-
-    respondent_role: extractResponseValue(state.responses["role"]),
-    years_experience_portfolio_management: extractResponseValue(state.responses["experience"]),
-    assessment_scope: extractResponseValue(state.responses["what_for"]),
-    assessment_object_name: extractResponseValue(state.responses["object_name"]),
-    overall_satisfaction: extractResponseValue(state.responses["satisfaction"]),
-    what_works_well: extractResponseValue(state.responses["what_works"]),
-    current_blockers: extractResponseValue(state.responses["what_blocks"]),
-
-    q_1_1_1: extractResponseValue(state.responses["1.1.1"]),
-    q_1_1_3: extractResponseValue(state.responses["1.1.3"]),
-    q_1_2_2: extractResponseValue(state.responses["1.2.2"]),
-    q_1_3_1: extractResponseValue(state.responses["1.3.1"]),
-    q_1_4_1: extractResponseValue(state.responses["1.4.1"]),
-    q_1_5_1: extractResponseValue(state.responses["1.5.1"]),
-
-    q_2_1_1: extractResponseValue(state.responses["2.1.1"]),
-    q_2_2_1: extractResponseValue(state.responses["2.2.1"]),
-    q_2_3_1: extractResponseValue(state.responses["2.3.1"]),
-    q_2_4_1: extractResponseValue(state.responses["2.4.1"]),
-    q_2_5_2: extractResponseValue(state.responses["2.5.2"]),
-    q_2_6_1: extractResponseValue(state.responses["2.6.1"]),
-
-    q_3_1_1: extractResponseValue(state.responses["3.1.1"]),
-    q_3_2_3: extractResponseValue(state.responses["3.2.3"]),
-    q_3_3_1: extractResponseValue(state.responses["3.3.1"]),
-    q_3_3_2: extractResponseValue(state.responses["3.3.2"]),
-    q_3_4_2: extractResponseValue(state.responses["3.4.2"]),
-    q_3_5_1: extractResponseValue(state.responses["3.5.1"]),
-    q_3_6_2: extractResponseValue(state.responses["3.6.2"]),
-    q_3_7_2: extractResponseValue(state.responses["3.7.2"]),
-    q_3_8_2: extractResponseValue(state.responses["3.8.2"]),
-
-    q_4_1_1: extractResponseValue(state.responses["4.1.1"]),
-    q_4_1_2: extractResponseValue(state.responses["4.1.2"]),
-    q_4_2_1: extractResponseValue(state.responses["4.2.1"]),
-    q_4_3_2: extractResponseValue(state.responses["4.3.2"]),
-
-    q_5_1_1: extractResponseValue(state.responses["5.1.1"]),
-    q_5_2_1: extractResponseValue(state.responses["5.2.1"]),
-    q_5_3_2: extractResponseValue(state.responses["5.3.2"]),
-    q_5_4_2: extractResponseValue(state.responses["5.4.2"]),
-    q_5_5_3: extractResponseValue(state.responses["5.5.3"]),
-    q_5_6_1: extractResponseValue(state.responses["5.6.1"]),
-    q_5_7_3: extractResponseValue(state.responses["5.7.3"]),
-
-    q_6_1_1: extractResponseValue(state.responses["6.1.1"]),
-    q_6_2_1: extractResponseValue(state.responses["6.2.1"]),
-    q_6_3_2: extractResponseValue(state.responses["6.3.2"]),
-    q_6_4_1: extractResponseValue(state.responses["6.4.1"]),
-    q_6_5_1: extractResponseValue(state.responses["6.5.1"]),
-
-    perceived_competitive_maturity: extractResponseValue(state.responses["perceived"]),
-    additional_comments: extractResponseValue(state.responses["anything_else"])
-  };
-
-  return payload;
-}
 
   async function submitSurveyToSupabase() {
-    const payload = buildSurveyPayload();
+    try {
+      const payload = buildSurveyPayload();
+      console.log("Submitting payload:", payload);
 
-    const { error } = await supabaseClient
-      .from("survey_responses")
-      .insert(payload);
+      if (!window.supabaseClient) {
+        console.error("supabaseClient is not defined");
+        showToast("Supabase ist nicht initialisiert");
+        return false;
+      }
 
-    if (error) {
-      console.error("Supabase insert error:", error);
-      showToast("Upload fehlgeschlagen");
+      const { error } = await supabaseClient
+        .from("survey_responses")
+        .insert([payload]);
+
+      if (error) {
+        console.error("Supabase insert error:", error);
+        showToast("Upload fehlgeschlagen");
+        return false;
+      }
+
+      console.log("Survey successfully inserted");
+      showToast("Antwort erfolgreich übermittelt");
+      return true;
+    } catch (err) {
+      console.error("Submit crashed:", err);
+      showToast("Technischer Fehler beim Upload");
       return false;
     }
-
-    showToast("Antwort erfolgreich übermittelt");
-    return true;
   }
 
-  async function finalSubmitSurvey() {
-    const hasAnyResponses = Object.keys(state.responses || {}).length > 0;
-    if (!hasAnyResponses) {
-      showToast("Bitte erst Antworten eingeben");
+  async function finalSubmitSurvey(event) {
+    try {
+      if (event) event.preventDefault();
+
+      console.log("finalSubmitSurvey triggered");
+
+      const hasAnyResponses = Object.keys(state?.responses || {}).length > 0;
+      if (!hasAnyResponses) {
+        showToast("Bitte erst Antworten eingeben");
+        return false;
+      }
+
+      const ok = await submitSurveyToSupabase();
+      if (!ok) return false;
+
+      showToast("Vielen Dank – die Antwort wurde gespeichert");
+      setTimeout(() => {
+        if (typeof resetCurrent === "function") {
+          resetCurrent();
+        }
+      }, 1200);
+
+      return false;
+    } catch (err) {
+      console.error("finalSubmitSurvey crashed:", err);
+      showToast("Technischer Fehler beim Abschluss");
+      return false;
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const submitBtn =
+      document.querySelector('[data-submit-survey]') ||
+      document.querySelector('#submitSurveyBtn') ||
+      document.querySelector('button[type="submit"]');
+
+    if (!submitBtn) {
+      console.warn("No submit button found for survey");
       return;
     }
 
-    const ok = await submitSurveyToSupabase();
-    if (!ok) return;
-
-    showToast("Vielen Dank – die Antwort wurde gespeichert");
-    setTimeout(() => {
-      resetCurrent();
-    }, 1200);
-  }
+    submitBtn.addEventListener("click", finalSubmitSurvey);
+    console.log("Survey submit handler attached", submitBtn);
+  });
 </script>
 </html>
