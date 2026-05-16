@@ -2902,7 +2902,20 @@ function renderResults() {
 
   // wire after DOM exists
   setTimeout(() => {
-    document.getElementById("btnSubmit").addEventListener("click", saveSubmission);
+    document.getElementById('btnSubmit').textContent = 'Submit survey';
+document.getElementById('btnSubmit').addEventListener('click', async () => {
+  const btn = document.getElementById('btnSubmit');
+  btn.disabled = true;
+  const oldText = btn.textContent;
+  btn.textContent = 'Submitting...';
+
+  try {
+    await finalSubmitSurvey();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = oldText;
+  }
+});
     document.getElementById("btnExportJson").addEventListener("click", exportJson);
     document.getElementById("btnExportCsv").addEventListener("click", exportCsv);
     document.getElementById("btnReset").addEventListener("click", resetCurrent);
@@ -3108,5 +3121,59 @@ document.getElementById("btnResults").addEventListener("click", () => {
 
 render();
 </script>
-</body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = "https://wrrixqvgyltmgqolvghl.supabase.co/rest/v1/";
+  const SUPABASE_ANON_KEY = "sb_publishable_nSOsKV-zJqM4ISoI3G0Oog_Vi--H-XI";
+
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  function buildSurveyPayload() {
+    return {
+      survey_name: "Portfolio Management Maturity Assessment",
+      survey_version: "light_v1",
+      submitted_at: new Date().toISOString(),
+      role: state.responses.role?.value || null,
+      object_name: state.responses.objectname?.valueText || null,
+      satisfaction: Number.isInteger(state.responses.satisfaction?.value)
+        ? state.responses.satisfaction.value
+        : null,
+      response_json: state.responses,
+      source: "web"
+    };
+  }
+
+  async function submitSurveyToSupabase() {
+    const payload = buildSurveyPayload();
+
+    const { error } = await supabaseClient
+      .from("survey_responses")
+      .insert(payload);
+
+    if (error) {
+      console.error("Supabase insert error:", error);
+      showToast("Upload fehlgeschlagen");
+      return false;
+    }
+
+    showToast("Antwort erfolgreich übermittelt");
+    return true;
+  }
+
+  async function finalSubmitSurvey() {
+    const hasAnyResponses = Object.keys(state.responses || {}).length > 0;
+    if (!hasAnyResponses) {
+      showToast("Bitte erst Antworten eingeben");
+      return;
+    }
+
+    const ok = await submitSurveyToSupabase();
+    if (!ok) return;
+
+    showToast("Vielen Dank – die Antwort wurde gespeichert");
+    setTimeout(() => {
+      resetCurrent();
+    }, 1200);
+  }
+</script>
 </html>
