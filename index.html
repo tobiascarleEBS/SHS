@@ -1895,19 +1895,81 @@ render();
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   function buildSurveyPayload() {
-    return {
-      survey_name: "Portfolio Management Maturity Assessment",
-      survey_version: "light_v1",
-      submitted_at: new Date().toISOString(),
-      role: state.responses.role?.value || null,
-      object_name: state.responses.objectname?.valueText || null,
-      satisfaction: Number.isInteger(state.responses.satisfaction?.value)
-        ? state.responses.satisfaction.value
-        : null,
-      response_json: state.responses,
-      source: "web"
+  function questionIdToColumnName(questionId, stem = "") {
+    const predefined = {
+      role: "respondent_role",
+      experience: "years_experience_portfolio_management",
+      what_for: "assessment_scope",
+      object_name: "assessment_object_name",
+      satisfaction: "overall_satisfaction",
+      what_works: "what_works_well",
+      what_blocks: "current_blockers",
+      anything_else: "additional_comments"
     };
+
+    if (predefined[questionId]) return predefined[questionId];
+
+    const stemSlug = String(stem || "")
+      .toLowerCase()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "")
+      .replace(/_+/g, "_")
+      .slice(0, 60);
+
+    const idSlug = String(questionId)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "");
+
+    return stemSlug ? `q_${idSlug}_${stemSlug}` : `q_${idSlug}`;
   }
+
+  function extractResponseValue(response) {
+    if (!response) return null;
+
+    if (typeof response.valueIndex === "number") {
+      if (response.value && String(response.value).toLowerCase().includes("don't know")) {
+        return null;
+      }
+      return response.valueIndex + 1;
+    }
+
+    if (typeof response.value === "number") {
+      return response.value;
+    }
+
+    if (typeof response.value === "string" && response.value.trim() !== "") {
+      return response.value.trim();
+    }
+
+    if (response.valueText && String(response.valueText).trim() !== "") {
+      return String(response.valueText).trim();
+    }
+
+    return null;
+  }
+
+  const payload = {
+    submission_id: crypto.randomUUID(),
+    submitted_at: new Date().toISOString(),
+    survey_name: "Portfolio Management Maturity Assessment",
+    survey_version: "light_v1",
+    source: "web"
+  };
+
+  DATA.sections.forEach(section => {
+    if (!section.questions) return;
+
+    section.questions.forEach(question => {
+      const response = state.responses[question.id];
+      const columnName = questionIdToColumnName(question.id, question.stem);
+      payload[columnName] = extractResponseValue(response);
+    });
+  });
+
+  return payload;
+}
 
   async function submitSurveyToSupabase() {
     const payload = buildSurveyPayload();
