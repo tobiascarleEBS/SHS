@@ -1992,7 +1992,7 @@ render();
 
       if (!supabaseClient) {
         console.error("supabaseClient is not defined");
-        showToast("Supabase ist nicht initialisiert");
+        showToast("Supabase not initalised");
         return false;
       }
 
@@ -2002,16 +2002,16 @@ render();
 
       if (error) {
         console.error("Supabase insert error:", error);
-        showToast("Upload fehlgeschlagen");
+        showToast("Upload error");
         return false;
       }
 
       console.log("Survey successfully inserted");
-      showToast("Antwort erfolgreich übermittelt");
+      showToast("Result successfully transmitted");
       return true;
     } catch (err) {
       console.error("Submit crashed:", err);
-      showToast("Technischer Fehler beim Upload");
+      showToast("Technical error");
       return false;
     }
   }
@@ -2024,14 +2024,14 @@ render();
 
       const hasAnyResponses = Object.keys(state?.responses || {}).length > 0;
       if (!hasAnyResponses) {
-        showToast("Bitte erst Antworten eingeben");
+        showToast("Please insert your responses");
         return false;
       }
 
       const ok = await submitSurveyToSupabase();
       if (!ok) return false;
 
-      showToast("Vielen Dank – die Antwort wurde gespeichert");
+      showToast("Thanks a lot - your answers are saved");
       setTimeout(() => {
         if (typeof resetCurrent === "function") {
           resetCurrent();
@@ -2041,7 +2041,7 @@ render();
       return false;
     } catch (err) {
       console.error("finalSubmitSurvey crashed:", err);
-      showToast("Technischer Fehler beim Abschluss");
+      showToast("Technical error");
       return false;
     }
   }
