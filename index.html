@@ -1990,7 +1990,7 @@ render();
       const payload = buildSurveyPayload();
       console.log("Submitting payload:", payload);
 
-      if (!window.supabaseClient) {
+      if (!supabaseClient) {
         console.error("supabaseClient is not defined");
         showToast("Supabase ist nicht initialisiert");
         return false;
